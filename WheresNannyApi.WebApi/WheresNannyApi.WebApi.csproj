@@ -23,7 +23,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Folder Include="Controllers\" />
+    <ProjectReference Include="..\WheresNannyApi.Domain\WheresNannyApi.Domain.csproj" />
   </ItemGroup>
 
 </Project>
