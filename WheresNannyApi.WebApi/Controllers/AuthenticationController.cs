@@ -23,11 +23,17 @@ namespace WheresNannyApi.WebApi.Controllers
         [HttpPost]
         public async Task<IActionResult> Login(UserLoginDto user)
         {
-            var token = await _tokenService.Login(user);
+            try
+            {
+                var token = await _tokenService.Login(user);
 
-            if(token == null) return NotFound($"Usuário: {user.Username} não foi encontrado no sistema.");
+                if(token == null) return NotFound($"Usuário: {user.Username} não foi encontrado no sistema.");
 
-            return Ok(token);
+                return Ok(token);
+            } catch (Exception ex)
+            {
+                return BadRequest("Um erro ocorreu durante a execução dessa requisição. Por favor, contate o administrador do sistema.");
+            }
         }
     }
 }
