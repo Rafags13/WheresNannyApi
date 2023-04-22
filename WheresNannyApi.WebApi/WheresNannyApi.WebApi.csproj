@@ -18,11 +18,13 @@
       <PrivateAssets>all</PrivateAssets>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
     </PackageReference>
-    <PackageReference Include="Swashbuckle.AspNetCore" Version="6.2.3" />
+    <PackageReference Include="Swashbuckle.AspNetCore" Version="6.5.0" />
     <PackageReference Include="TanvirArjel.EFCore.GenericRepository" Version="6.0.0" />
   </ItemGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\WheresNannyApi.Application\WheresNannyApi.Application.csproj" />
+    <ProjectReference Include="..\WheresNannyApi.Data\WheresNannyApi.Data.csproj" />
     <ProjectReference Include="..\WheresNannyApi.Domain\WheresNannyApi.Domain.csproj" />
   </ItemGroup>
 
