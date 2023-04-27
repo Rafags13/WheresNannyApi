@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using WheresNannyApi.Data.Context;
 
@@ -11,9 +12,10 @@ using WheresNannyApi.Data.Context;
 namespace WheresNannyApi.Data.Migrations
 {
     [DbContext(typeof(DataContext))]
-    partial class DataContextModelSnapshot : ModelSnapshot
+    [Migration("20230427155545_CreateServiceTable")]
+    partial class CreateServiceTable
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -32,13 +34,15 @@ namespace WheresNannyApi.Data.Migrations
 
                     b.Property<string>("Cep")
                         .IsRequired()
-                        .HasColumnType("varchar(8)");
+                        .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("Complement")
-                        .HasColumnType("varchar(50)");
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("HouseNumber")
-                        .HasColumnType("varchar(4)");
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
 
                     b.Property<int>("personId")
                         .HasColumnType("int");
@@ -48,7 +52,7 @@ namespace WheresNannyApi.Data.Migrations
                     b.HasIndex("personId")
                         .IsUnique();
 
-                    b.ToTable("Addresses", (string)null);
+                    b.ToTable("Address");
                 });
 
             modelBuilder.Entity("WheresNannyApi.Domain.Entities.Person", b =>
@@ -60,23 +64,23 @@ namespace WheresNannyApi.Data.Migrations
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"), 1L, 1);
 
                     b.Property<DateTime>("BirthdayDate")
-                        .HasColumnType("datetime");
+                        .HasColumnType("datetime2");
 
                     b.Property<string>("Cellphone")
                         .IsRequired()
-                        .HasColumnType("varchar(50)");
+                        .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("Cpf")
                         .IsRequired()
-                        .HasColumnType("varchar(11)");
+                        .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("Email")
                         .IsRequired()
-                        .HasColumnType("varchar(100)");
+                        .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("Fullname")
                         .IsRequired()
-                        .HasColumnType("varchar(150)");
+                        .HasColumnType("nvarchar(max)");
 
                     b.Property<bool>("IsNanny")
                         .HasColumnType("bit");
@@ -89,36 +93,7 @@ namespace WheresNannyApi.Data.Migrations
                     b.HasIndex("UserId")
                         .IsUnique();
 
-                    b.ToTable("Persons", (string)null);
-                });
-
-            modelBuilder.Entity("WheresNannyApi.Domain.Entities.Service", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"), 1L, 1);
-
-                    b.Property<int>("NannyId")
-                        .HasColumnType("int");
-
-                    b.Property<int>("PersonId")
-                        .HasColumnType("int");
-
-                    b.Property<decimal>("Price")
-                        .HasColumnType("decimal");
-
-                    b.Property<TimeSpan>("Time")
-                        .HasColumnType("time");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("NannyId");
-
-                    b.HasIndex("PersonId");
-
-                    b.ToTable("Services", (string)null);
+                    b.ToTable("Person");
                 });
 
             modelBuilder.Entity("WheresNannyApi.Domain.Entities.User", b =>
@@ -173,33 +148,10 @@ namespace WheresNannyApi.Data.Migrations
                     b.Navigation("User");
                 });
 
-            modelBuilder.Entity("WheresNannyApi.Domain.Entities.Service", b =>
-                {
-                    b.HasOne("WheresNannyApi.Domain.Entities.Person", "NannyService")
-                        .WithMany("ServiceNanny")
-                        .HasForeignKey("NannyId")
-                        .OnDelete(DeleteBehavior.Restrict)
-                        .IsRequired();
-
-                    b.HasOne("WheresNannyApi.Domain.Entities.Person", "PersonService")
-                        .WithMany("ServicesPerson")
-                        .HasForeignKey("PersonId")
-                        .OnDelete(DeleteBehavior.Restrict)
-                        .IsRequired();
-
-                    b.Navigation("NannyService");
-
-                    b.Navigation("PersonService");
-                });
-
             modelBuilder.Entity("WheresNannyApi.Domain.Entities.Person", b =>
                 {
                     b.Navigation("Address")
                         .IsRequired();
-
-                    b.Navigation("ServiceNanny");
-
-                    b.Navigation("ServicesPerson");
                 });
 
             modelBuilder.Entity("WheresNannyApi.Domain.Entities.User", b =>

@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using WheresNannyApi.Data.Context;
 
@@ -11,9 +12,10 @@ using WheresNannyApi.Data.Context;
 namespace WheresNannyApi.Data.Migrations
 {
     [DbContext(typeof(DataContext))]
-    partial class DataContextModelSnapshot : ModelSnapshot
+    [Migration("20230427160058_CreateUserPersonRelationship")]
+    partial class CreateUserPersonRelationship
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -100,12 +102,6 @@ namespace WheresNannyApi.Data.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"), 1L, 1);
 
-                    b.Property<int>("NannyId")
-                        .HasColumnType("int");
-
-                    b.Property<int>("PersonId")
-                        .HasColumnType("int");
-
                     b.Property<decimal>("Price")
                         .HasColumnType("decimal");
 
@@ -113,10 +109,6 @@ namespace WheresNannyApi.Data.Migrations
                         .HasColumnType("time");
 
                     b.HasKey("Id");
-
-                    b.HasIndex("NannyId");
-
-                    b.HasIndex("PersonId");
 
                     b.ToTable("Services", (string)null);
                 });
@@ -173,33 +165,10 @@ namespace WheresNannyApi.Data.Migrations
                     b.Navigation("User");
                 });
 
-            modelBuilder.Entity("WheresNannyApi.Domain.Entities.Service", b =>
-                {
-                    b.HasOne("WheresNannyApi.Domain.Entities.Person", "NannyService")
-                        .WithMany("ServiceNanny")
-                        .HasForeignKey("NannyId")
-                        .OnDelete(DeleteBehavior.Restrict)
-                        .IsRequired();
-
-                    b.HasOne("WheresNannyApi.Domain.Entities.Person", "PersonService")
-                        .WithMany("ServicesPerson")
-                        .HasForeignKey("PersonId")
-                        .OnDelete(DeleteBehavior.Restrict)
-                        .IsRequired();
-
-                    b.Navigation("NannyService");
-
-                    b.Navigation("PersonService");
-                });
-
             modelBuilder.Entity("WheresNannyApi.Domain.Entities.Person", b =>
                 {
                     b.Navigation("Address")
                         .IsRequired();
-
-                    b.Navigation("ServiceNanny");
-
-                    b.Navigation("ServicesPerson");
                 });
 
             modelBuilder.Entity("WheresNannyApi.Domain.Entities.User", b =>

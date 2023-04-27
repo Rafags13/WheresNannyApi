@@ -14,5 +14,6 @@ namespace WheresNannyApi.Domain.Entities
         public string Token { get; set; }
         public DateTime? ExpiresIn { get; set; }
         public DateTime? CreatedIn { get; set; }
+        public Person Person { get; set; }  
     }
 }
