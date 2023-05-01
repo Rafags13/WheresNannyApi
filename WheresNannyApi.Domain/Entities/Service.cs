@@ -15,8 +15,8 @@ namespace WheresNannyApi.Domain.Entities
         public TimeSpan Time;
         public decimal Price{ get; set; }
         public int PersonId { get; set; }
-        public Person PersonService {get; set; }
+        public Person? PersonService {get; set; }
         public int NannyId { get; set; }
-        public Person NannyService { get; set; }
+        public Person? NannyService { get; set; }
     }
 }

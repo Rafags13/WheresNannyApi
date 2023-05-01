@@ -21,7 +21,7 @@ namespace WheresNannyApi.WebApi.Controllers
         }
 
         [HttpPost]
-        public async Task<IActionResult> Login(UserLoginDto user)
+        public async Task<IActionResult> Login([FromBody] UserLoginDto user)
         {
             try
             {
@@ -32,7 +32,8 @@ namespace WheresNannyApi.WebApi.Controllers
                 return Ok(token);
             } catch (Exception ex)
             {
-                return BadRequest("Um erro ocorreu durante a execução dessa requisição. Por favor, contate o administrador do sistema.");
+                
+                return BadRequest(ex.Message);
             }
         }
     }

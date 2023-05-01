@@ -76,7 +76,7 @@ namespace WheresNannyApi.Data.Context
 
                 entity.HasOne(x => x.Address)
                     .WithOne(y => y.Person)
-                    .HasForeignKey<Address>(y => y.personId);
+                    .HasForeignKey<Address>(y => y.PersonId);
 
 
             });
