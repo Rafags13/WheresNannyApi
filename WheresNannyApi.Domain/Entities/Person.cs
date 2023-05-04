@@ -14,7 +14,7 @@ namespace WheresNannyApi.Domain.Entities
             string cellphone, 
             DateTime birthdayDate, 
             string cpf,
-            bool isNanny,
+            string imageUri,
             int userId
             ) 
         {
@@ -23,20 +23,22 @@ namespace WheresNannyApi.Domain.Entities
             Cellphone = cellphone;
             BirthdayDate = birthdayDate;
             Cpf = cpf;
-            IsNanny = isNanny;
+            ImageUri = imageUri;
             UserId = userId;
         }
+
+        public Person() { }
         public int Id { get; set; }
-        public string Fullname { get; set; }
-        public string Email { get; set; }
-        public string Cellphone { get; set; }
+        public string Fullname { get; set; } = String.Empty;
+        public string Email { get; set; } = String.Empty;
+        public string Cellphone { get; set; } = String.Empty;
         public DateTime BirthdayDate { get; set; }
-        public string Cpf { get; set; }
-        public bool IsNanny { get; set; }
+        public string Cpf { get; set; } = String.Empty;
+        public string ImageUri { get; set; } = String.Empty;
         public int UserId { get; set; }
         public User? User { get; set; }
         public Address? Address { get; set; }
+        public Nanny? Nanny { get; set; }
         public ICollection<Service>? ServicesPerson { get; set; }
-        public ICollection<Service>? ServiceNanny { get; set; }
     }
 }

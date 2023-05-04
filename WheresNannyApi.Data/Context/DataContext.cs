@@ -70,14 +70,17 @@ namespace WheresNannyApi.Data.Context
                     .HasColumnType("varchar(11)")
                     .IsRequired();
 
-                entity.Property(x => x.IsNanny)
-                    .HasColumnType("bit")
+                entity.Property(X => X.ImageUri)
+                    .HasColumnType("varchar(max)")
                     .IsRequired();
 
                 entity.HasOne(x => x.Address)
                     .WithOne(y => y.Person)
                     .HasForeignKey<Address>(y => y.PersonId);
 
+                entity.HasOne(x => x.Nanny)
+                    .WithOne(y => y.Person)
+                    .HasForeignKey<Nanny>(y => y.PersonId);
 
             });
 
@@ -100,7 +103,6 @@ namespace WheresNannyApi.Data.Context
                 entity.Property(x => x.Complement)
                     .HasColumnType("varchar(50)")
                     .IsRequired(false);
-
             });
 
             modelBuilder.Entity<Service>(entity =>
@@ -126,13 +128,19 @@ namespace WheresNannyApi.Data.Context
                    
 
                 entity.HasOne(x => x.NannyService)
-                   .WithMany(y => y.ServiceNanny)
+                   .WithMany(y => y.ServicesNanny)
                    .HasForeignKey(x => x.NannyId)
                    .OnDelete(DeleteBehavior.Restrict);
             });
 
+            modelBuilder.Entity<Nanny>(entity =>
+            {
+                entity.ToTable("Nannys");
 
-
+                entity.Property(x => x.ServicePrice)
+                    .HasColumnType("float")
+                    .IsRequired();
+            });
 
             base.OnModelCreating(modelBuilder);
         }

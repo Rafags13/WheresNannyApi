@@ -38,7 +38,7 @@ namespace WheresNannyApi.Application.Services
                         userRegisterDto.Cellphone,
                         userRegisterDto.BirthdayDate,
                         userRegisterDto.Cpf,
-                        userRegisterDto.IsNanny,
+                        userRegisterDto.ImageUri,
                         currentUser.Id
                     );
 
