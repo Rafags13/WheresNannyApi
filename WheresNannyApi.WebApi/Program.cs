@@ -21,6 +21,8 @@ builder.Services.AddDbContext<DataContext>(option =>
 // Dependency injection
 builder.Services.AddScoped<ITokenService, TokenService>();
 builder.Services.AddScoped<IUserService, UserService>();
+builder.Services.AddScoped<IPersonService, PersonService>();
+builder.Services.AddScoped<IServicesService, ServicesService>();
 
 builder.Services.AddGenericRepository<DataContext>();
 

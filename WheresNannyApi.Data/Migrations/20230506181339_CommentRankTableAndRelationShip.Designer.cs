@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using WheresNannyApi.Data.Context;
 
@@ -11,9 +12,10 @@ using WheresNannyApi.Data.Context;
 namespace WheresNannyApi.Data.Migrations
 {
     [DbContext(typeof(DataContext))]
-    partial class DataContextModelSnapshot : ModelSnapshot
+    [Migration("20230506181339_CommentRankTableAndRelationShip")]
+    partial class CommentRankTableAndRelationShip
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -130,9 +132,6 @@ namespace WheresNannyApi.Data.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"), 1L, 1);
 
-                    b.Property<DateTime>("HiringDate")
-                        .HasColumnType("datetime");
-
                     b.Property<int>("NannyId")
                         .HasColumnType("int");
 
@@ -142,7 +141,7 @@ namespace WheresNannyApi.Data.Migrations
                     b.Property<decimal>("Price")
                         .HasColumnType("decimal");
 
-                    b.Property<TimeSpan>("ServiceFinishHour")
+                    b.Property<TimeSpan>("Time")
                         .HasColumnType("time");
 
                     b.HasKey("Id");
@@ -190,9 +189,6 @@ namespace WheresNannyApi.Data.Migrations
 
                     b.Property<int>("PersonId")
                         .HasColumnType("int");
-
-                    b.Property<float>("RankAvegerageStars")
-                        .HasColumnType("real");
 
                     b.Property<double>("ServicePrice")
                         .HasColumnType("float");

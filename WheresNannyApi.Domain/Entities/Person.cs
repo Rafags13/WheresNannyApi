@@ -40,5 +40,6 @@ namespace WheresNannyApi.Domain.Entities
         public Address? Address { get; set; }
         public Nanny? Nanny { get; set; }
         public ICollection<Service>? ServicesPerson { get; set; }
+        public ICollection<CommentRank> CommentsRank { get; set; }
     }
 }

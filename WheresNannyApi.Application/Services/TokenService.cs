@@ -25,7 +25,7 @@ namespace WheresNannyApi.Application.Services
             _configuration = configuration;
         }
 
-        public string GenerateTokenBasedInUser(UserLoginDto user, DateTime timeToExpire)
+        public string GenerateTokenBasedInUser(Person person, DateTime timeToExpire)
         {
             var key = Encoding.ASCII.GetBytes(_configuration.GetValue<string>("JWt:Key"));
 
@@ -33,9 +33,10 @@ namespace WheresNannyApi.Application.Services
             {
                 Subject = new ClaimsIdentity(new[]
             {
-                new Claim("Id", Guid.NewGuid().ToString()),
-                new Claim(JwtRegisteredClaimNames.Sub, user.Username),
-                new Claim(JwtRegisteredClaimNames.Email, user.Username),
+                new Claim("Id", person.User.Id.ToString()),
+                new Claim("imageUri", person.ImageUri),
+                new Claim(JwtRegisteredClaimNames.Sub, person.User.Username),
+                new Claim(JwtRegisteredClaimNames.Email, person.Email),
                 new Claim(JwtRegisteredClaimNames.Jti,
                 Guid.NewGuid().ToString())
              }),
@@ -60,7 +61,9 @@ namespace WheresNannyApi.Application.Services
 
             DateTime timeToExpire = DateTime.UtcNow.AddMinutes(5);
 
-            var jwtToken = GenerateTokenBasedInUser(user, timeToExpire);
+            var person = await _repository.GetAsync<Person>(x => x.UserId == userFounded.Id);
+
+            var jwtToken = GenerateTokenBasedInUser(person, timeToExpire);
 
             userFounded.Token = jwtToken;
             userFounded.CreatedIn = DateTime.Now;

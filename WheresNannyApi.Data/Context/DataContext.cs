@@ -113,8 +113,12 @@ namespace WheresNannyApi.Data.Context
                 entity.Property(x => x.Id)
                     .ValueGeneratedOnAdd();
 
-                entity.Property(x => x.Time)
+                entity.Property(x => x.ServiceFinishHour)
                     .HasColumnType("time")
+                    .IsRequired();
+
+                entity.Property(x => x.HiringDate)
+                    .HasColumnType("datetime")
                     .IsRequired();
 
                 entity.Property(x => x.Price)
@@ -140,6 +144,29 @@ namespace WheresNannyApi.Data.Context
                 entity.Property(x => x.ServicePrice)
                     .HasColumnType("float")
                     .IsRequired();
+            });
+
+            modelBuilder.Entity<CommentRank>(entity =>
+            {
+                entity.ToTable("CommentsRank");
+
+                entity.HasKey(x => x.Id);
+                entity.Property(x => x.Id)
+                    .ValueGeneratedOnAdd();
+
+                entity.Property(x => x.Comment)
+                    .HasColumnType("varchar(50)")
+                    .IsRequired(false);
+
+                entity.HasOne(x => x.PersonWhoComment)
+                    .WithMany(y => y.CommentsRank)
+                    .HasForeignKey(y => y.PersonWhoCommentId)
+                    .OnDelete(DeleteBehavior.Restrict);
+
+                entity.HasOne(x => x.NannyWhoRecieveTheComment)
+                    .WithMany(y => y.CommentsRankNanny)
+                    .HasForeignKey(y => y.NannyWhoRecieveTheCommentId)
+                    .OnDelete(DeleteBehavior.Restrict);
             });
 
             base.OnModelCreating(modelBuilder);

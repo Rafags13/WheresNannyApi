@@ -1,6 +1,7 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using TanvirArjel.EFCore.GenericRepository;
 using WheresNannyApi.Application.Interfaces;
+using WheresNannyApi.Domain.Entities.Dto;
 
 namespace WheresNannyApi.WebApi.Controllers
 {
@@ -14,14 +15,14 @@ namespace WheresNannyApi.WebApi.Controllers
             _personService = personService;
         }
 
-        [HttpGet("GetAllNannys")]
-        public async Task<IActionResult> GetAllNannys()
+        [HttpGet("GetUserHomeInformation")]
+        public async Task<IActionResult> GetUserMainPageInformation(int personId)
         {
-            var nannys = await _personService.GetAllNannys();
+            var nannys = await _personService.GetUserMainPageInformation(personId);
 
             if(nannys == null)
             {
-                return NotFound("Não existe nenhuma babá registrada no sistema ainda.");
+                return BadRequest("Algo de errado aconteceu durante a pesquisa dos seus dados.");
             }
 
             return Ok(nannys);

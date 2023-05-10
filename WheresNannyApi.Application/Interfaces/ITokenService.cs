@@ -12,6 +12,6 @@ namespace WheresNannyApi.Application.Interfaces
     public interface ITokenService
     {
         Task<string> Login(UserLoginDto user);
-        string GenerateTokenBasedInUser(UserLoginDto user, DateTime timeToExpire);
+        string GenerateTokenBasedInUser(Person person, DateTime timeToExpire);
     }
 }
