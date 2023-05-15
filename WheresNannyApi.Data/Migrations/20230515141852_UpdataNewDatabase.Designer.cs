@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using WheresNannyApi.Data.Context;
 
@@ -11,9 +12,10 @@ using WheresNannyApi.Data.Context;
 namespace WheresNannyApi.Data.Migrations
 {
     [DbContext(typeof(DataContext))]
-    partial class DataContextModelSnapshot : ModelSnapshot
+    [Migration("20230515141852_UpdataNewDatabase")]
+    partial class UpdataNewDatabase
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -62,10 +64,10 @@ namespace WheresNannyApi.Data.Migrations
                     b.Property<string>("Comment")
                         .HasColumnType("varchar(50)");
 
-                    b.Property<int?>("NannyWhoRecieveTheCommentId")
+                    b.Property<int>("NannyWhoRecieveTheCommentId")
                         .HasColumnType("int");
 
-                    b.Property<int?>("PersonWhoCommentId")
+                    b.Property<int>("PersonWhoCommentId")
                         .HasColumnType("int");
 
                     b.Property<float>("RankStarsCounting")
@@ -275,12 +277,14 @@ namespace WheresNannyApi.Data.Migrations
                     b.HasOne("WheresNannyApi.Domain.Entities.Nanny", "NannyWhoRecieveTheComment")
                         .WithMany("CommentsRankNanny")
                         .HasForeignKey("NannyWhoRecieveTheCommentId")
-                        .OnDelete(DeleteBehavior.Restrict);
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
 
                     b.HasOne("WheresNannyApi.Domain.Entities.Person", "PersonWhoComment")
                         .WithMany("CommentsRank")
                         .HasForeignKey("PersonWhoCommentId")
-                        .OnDelete(DeleteBehavior.Restrict);
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
 
                     b.Navigation("NannyWhoRecieveTheComment");
 

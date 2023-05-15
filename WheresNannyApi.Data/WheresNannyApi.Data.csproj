@@ -9,7 +9,6 @@
   <ItemGroup>
     <Folder Include="Context\" />
     <Folder Include="DataConfiguration\" />
-    <Folder Include="Migrations\" />
   </ItemGroup>
 
   <ItemGroup>

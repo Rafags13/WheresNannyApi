@@ -141,8 +141,17 @@ namespace WheresNannyApi.Data.Context
             {
                 entity.ToTable("Nannys");
 
+                entity.HasKey(x => x.Id);
+                entity.Property(x => x.Id)
+                    .ValueGeneratedOnAdd();
+
                 entity.Property(x => x.ServicePrice)
                     .HasColumnType("float")
+                    .IsRequired();
+                
+                entity.Property(x => x.ApprovedToWork)
+                    .HasColumnType("bit")
+                    .HasDefaultValue(false)
                     .IsRequired();
             });
 
@@ -167,6 +176,44 @@ namespace WheresNannyApi.Data.Context
                     .WithMany(y => y.CommentsRankNanny)
                     .HasForeignKey(y => y.NannyWhoRecieveTheCommentId)
                     .OnDelete(DeleteBehavior.Restrict);
+            });
+
+            modelBuilder.Entity<DocumentType>(entity =>
+            {
+                entity.ToTable("DocumentTypes");
+
+                entity.HasKey(x => x.Id);
+                entity.Property(x => x.Id)
+                    .ValueGeneratedOnAdd();
+
+                entity.Property(x => x.Name)
+                    .HasColumnType("varchar(50)")
+                    .IsRequired();
+
+                entity.Property(x => x.Description)
+                    .HasColumnType("varchar(250)")
+                    .IsRequired();
+            });
+
+            modelBuilder.Entity<Document>(entity =>
+            {
+                entity.ToTable("Documents");
+
+                entity.HasKey(x => x.Id);
+                entity.Property(x => x.Id)
+                    .ValueGeneratedOnAdd();
+
+                entity.Property(x => x.FileInBase64)
+                    .HasColumnType("varchar(max)")
+                    .IsRequired();
+
+                entity.HasOne(x => x.PersonDocumentOwner)
+                    .WithMany(x => x.PersonDocuments)
+                    .HasForeignKey(x => x.PersonId);
+
+                entity.HasOne(x => x.TypeFromDocument)
+                    .WithMany(x => x.DocumentsWhoHaveThisDocumentType)
+                    .HasForeignKey(x => x.DocumentTypeId);
             });
 
             base.OnModelCreating(modelBuilder);

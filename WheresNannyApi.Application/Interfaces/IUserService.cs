@@ -11,5 +11,6 @@ namespace WheresNannyApi.Application.Interfaces
     public interface IUserService
     {
         public Task<string> RegisterUser(UserRegisterDto userRegisterDto);
+        public Task<string> RegisterNanny(NannyRegisterDto nannyRegisterDto);
     }
 }

@@ -18,6 +18,7 @@ namespace WheresNannyApi.Application.Services
         {
             _repository = repository;
         }
+        #region Register User
 
         public async Task<string> RegisterUser(UserRegisterDto userRegisterDto)
         {
@@ -74,5 +75,58 @@ namespace WheresNannyApi.Application.Services
 
             return person != null;
         }
+        #endregion
+
+        #region Register Nanny
+        public async Task<string> RegisterNanny(NannyRegisterDto nannyRegisterDto)
+        {
+            var errorMessageFromUserRegister = await RegisterUser(nannyRegisterDto.UserDataToRegister);
+            if (errorMessageFromUserRegister != "") { return errorMessageFromUserRegister; }
+
+            var currentPerson = await _repository.GetAsync<Person>(x => x.Email == nannyRegisterDto.UserDataToRegister.Email);
+
+            if( currentPerson is null ) { return "Algo ocorreu de errado durante o seu registro. Por favor, contate um administrador do sistema."; }
+
+            var newNanny = new Nanny(nannyRegisterDto.ServicePrice, currentPerson.Id);
+
+            await _repository.AddAsync(newNanny);
+            await _repository.SaveChangesAsync();
+
+            var registerNannyDocuments = new NannyRegisterDocumentDto(currentPerson.Id, nannyRegisterDto.Base64CriminalRecord, nannyRegisterDto.Base64ProofOfAddress);
+            AddDocumentsFromNannyPerson(registerNannyDocuments);
+
+            AddDefaultCommentToFirstRegisterNanny(currentPerson.Id);
+
+            return "";
+        }
+
+        public async void AddDocumentsFromNannyPerson(NannyRegisterDocumentDto nannyRegisterDocumentDto)
+        {
+            var criminalRecordDocumentType = await _repository.GetAsync<DocumentType>(x => x.Name == "Antecedente Criminal");
+            var proofOfAddressDocumentType = await _repository.GetAsync<DocumentType>(x => x.Name == "Comprovante de residencia");
+
+            var documents = new List<Document>()
+            {
+                new Document(nannyRegisterDocumentDto.PersonId, criminalRecordDocumentType.Id, nannyRegisterDocumentDto.Base64CriminalRecord),
+                new Document(nannyRegisterDocumentDto.PersonId, proofOfAddressDocumentType.Id, nannyRegisterDocumentDto.Base64ProofOfAddress),
+            };
+
+            foreach (var document in documents)
+            {
+                await _repository.AddAsync(document);
+            }
+            await _repository.SaveChangesAsync();
+        }
+
+        public async void AddDefaultCommentToFirstRegisterNanny(int personId)
+        {
+            var defaultFirstComment = new CommentRank();
+            defaultFirstComment.RankStarsCounting = 5.0f;
+            defaultFirstComment.NannyWhoRecieveTheCommentId = (await _repository.GetAsync<Nanny>(x => x.PersonId == personId)).Id;
+
+            await _repository.AddAsync(defaultFirstComment);
+            await _repository.SaveChangesAsync();
+        }
+        #endregion
     }
 }

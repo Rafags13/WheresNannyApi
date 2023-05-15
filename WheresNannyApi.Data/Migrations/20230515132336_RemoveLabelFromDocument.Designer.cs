@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using WheresNannyApi.Data.Context;
 
@@ -11,9 +12,10 @@ using WheresNannyApi.Data.Context;
 namespace WheresNannyApi.Data.Migrations
 {
     [DbContext(typeof(DataContext))]
-    partial class DataContextModelSnapshot : ModelSnapshot
+    [Migration("20230515132336_RemoveLabelFromDocument")]
+    partial class RemoveLabelFromDocument
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -62,10 +64,10 @@ namespace WheresNannyApi.Data.Migrations
                     b.Property<string>("Comment")
                         .HasColumnType("varchar(50)");
 
-                    b.Property<int?>("NannyWhoRecieveTheCommentId")
+                    b.Property<int>("NannyWhoRecieveTheCommentId")
                         .HasColumnType("int");
 
-                    b.Property<int?>("PersonWhoCommentId")
+                    b.Property<int>("PersonWhoCommentId")
                         .HasColumnType("int");
 
                     b.Property<float>("RankStarsCounting")
@@ -126,33 +128,6 @@ namespace WheresNannyApi.Data.Migrations
                     b.HasKey("Id");
 
                     b.ToTable("DocumentTypes", (string)null);
-                });
-
-            modelBuilder.Entity("WheresNannyApi.Domain.Entities.Nanny", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"), 1L, 1);
-
-                    b.Property<bool>("ApprovedToWork")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("bit")
-                        .HasDefaultValue(false);
-
-                    b.Property<int>("PersonId")
-                        .HasColumnType("int");
-
-                    b.Property<double>("ServicePrice")
-                        .HasColumnType("float");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("PersonId")
-                        .IsUnique();
-
-                    b.ToTable("Nannys", (string)null);
                 });
 
             modelBuilder.Entity("WheresNannyApi.Domain.Entities.Person", b =>
@@ -259,6 +234,31 @@ namespace WheresNannyApi.Data.Migrations
                     b.ToTable("Users", (string)null);
                 });
 
+            modelBuilder.Entity("WheresNannyApi.Domain.Entities.Nanny", b =>
+                {
+                    b.HasBaseType("WheresNannyApi.Domain.Entities.Person");
+
+                    b.Property<bool>("ApprovedToWork")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("bit")
+                        .HasDefaultValue(false);
+
+                    b.Property<int>("PersonId")
+                        .HasColumnType("int");
+
+                    b.Property<float>("RankAvegerageStars")
+                        .HasColumnType("real");
+
+                    b.Property<double>("ServicePrice")
+                        .HasColumnType("float");
+
+                    b.HasIndex("PersonId")
+                        .IsUnique()
+                        .HasFilter("[PersonId] IS NOT NULL");
+
+                    b.ToTable("Nannys", (string)null);
+                });
+
             modelBuilder.Entity("WheresNannyApi.Domain.Entities.Address", b =>
                 {
                     b.HasOne("WheresNannyApi.Domain.Entities.Person", "Person")
@@ -275,12 +275,14 @@ namespace WheresNannyApi.Data.Migrations
                     b.HasOne("WheresNannyApi.Domain.Entities.Nanny", "NannyWhoRecieveTheComment")
                         .WithMany("CommentsRankNanny")
                         .HasForeignKey("NannyWhoRecieveTheCommentId")
-                        .OnDelete(DeleteBehavior.Restrict);
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
 
                     b.HasOne("WheresNannyApi.Domain.Entities.Person", "PersonWhoComment")
                         .WithMany("CommentsRank")
                         .HasForeignKey("PersonWhoCommentId")
-                        .OnDelete(DeleteBehavior.Restrict);
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
 
                     b.Navigation("NannyWhoRecieveTheComment");
 
@@ -304,17 +306,6 @@ namespace WheresNannyApi.Data.Migrations
                     b.Navigation("PersonDocumentOwner");
 
                     b.Navigation("TypeFromDocument");
-                });
-
-            modelBuilder.Entity("WheresNannyApi.Domain.Entities.Nanny", b =>
-                {
-                    b.HasOne("WheresNannyApi.Domain.Entities.Person", "Person")
-                        .WithOne("Nanny")
-                        .HasForeignKey("WheresNannyApi.Domain.Entities.Nanny", "PersonId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("Person");
                 });
 
             modelBuilder.Entity("WheresNannyApi.Domain.Entities.Person", b =>
@@ -347,16 +338,26 @@ namespace WheresNannyApi.Data.Migrations
                     b.Navigation("PersonService");
                 });
 
+            modelBuilder.Entity("WheresNannyApi.Domain.Entities.Nanny", b =>
+                {
+                    b.HasOne("WheresNannyApi.Domain.Entities.Person", null)
+                        .WithOne()
+                        .HasForeignKey("WheresNannyApi.Domain.Entities.Nanny", "Id")
+                        .OnDelete(DeleteBehavior.ClientCascade)
+                        .IsRequired();
+
+                    b.HasOne("WheresNannyApi.Domain.Entities.Person", "Person")
+                        .WithOne("Nanny")
+                        .HasForeignKey("WheresNannyApi.Domain.Entities.Nanny", "PersonId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Person");
+                });
+
             modelBuilder.Entity("WheresNannyApi.Domain.Entities.DocumentType", b =>
                 {
                     b.Navigation("DocumentsWhoHaveThisDocumentType");
-                });
-
-            modelBuilder.Entity("WheresNannyApi.Domain.Entities.Nanny", b =>
-                {
-                    b.Navigation("CommentsRankNanny");
-
-                    b.Navigation("ServicesNanny");
                 });
 
             modelBuilder.Entity("WheresNannyApi.Domain.Entities.Person", b =>
@@ -375,6 +376,13 @@ namespace WheresNannyApi.Data.Migrations
             modelBuilder.Entity("WheresNannyApi.Domain.Entities.User", b =>
                 {
                     b.Navigation("Person");
+                });
+
+            modelBuilder.Entity("WheresNannyApi.Domain.Entities.Nanny", b =>
+                {
+                    b.Navigation("CommentsRankNanny");
+
+                    b.Navigation("ServicesNanny");
                 });
 #pragma warning restore 612, 618
         }

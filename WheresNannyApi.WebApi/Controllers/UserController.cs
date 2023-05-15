@@ -28,5 +28,18 @@ namespace WheresNannyApi.WebApi.Controllers
 
             return Conflict(errorMessage);
         }
+
+        [HttpPost("RegisterNanny")]
+        public async Task<IActionResult> RegisterNanny([FromBody] NannyRegisterDto nannyRegisterDto)
+        {
+            var errorMessage = await _userService.RegisterNanny(nannyRegisterDto);
+
+            if (errorMessage == "")
+            {
+                return Ok("Você foi registrada no sistema. Aguarde enquanto fazemos uma análise interna e, assim que for aprovada, te enviaremos um email com os próximos passos");
+            }
+
+            return Conflict(errorMessage);
+        }
     }
 }
