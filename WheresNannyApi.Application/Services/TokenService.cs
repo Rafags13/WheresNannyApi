@@ -1,4 +1,6 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Arch.EntityFrameworkCore.UnitOfWork;
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.IdentityModel.Tokens;
 using System;
@@ -19,10 +21,12 @@ namespace WheresNannyApi.Application.Services
     {
         private readonly IRepository _repository;
         private readonly IConfiguration _configuration;
-        public TokenService(IRepository repository, IConfiguration configuration) 
+        private readonly IUnitOfWork _unitOfWork;
+        public TokenService(IRepository repository, IConfiguration configuration, IUnitOfWork unitOfWork) 
         {
             _repository = repository;
             _configuration = configuration;
+            _unitOfWork = unitOfWork;
         }
 
         public string GenerateTokenBasedInUser(Person person, DateTime timeToExpire)
@@ -33,12 +37,11 @@ namespace WheresNannyApi.Application.Services
             {
                 Subject = new ClaimsIdentity(new[]
             {
-                new Claim("Id", person.User.Id.ToString()),
+                new Claim("id", person.User.Id.ToString()),
                 new Claim("imageUri", person.ImageUri),
-                new Claim(JwtRegisteredClaimNames.Sub, person.User.Username),
+                new Claim("username", person.User.Username),
                 new Claim(JwtRegisteredClaimNames.Email, person.Email),
-                new Claim(JwtRegisteredClaimNames.Jti,
-                Guid.NewGuid().ToString())
+                new Claim("cep", person.Address.Cep)
              }),
                 Expires = timeToExpire,
                 SigningCredentials = new SigningCredentials
@@ -61,7 +64,13 @@ namespace WheresNannyApi.Application.Services
 
             DateTime timeToExpire = DateTime.UtcNow.AddMinutes(5);
 
-            var person = await _repository.GetAsync<Person>(x => x.UserId == userFounded.Id);
+            var person = _unitOfWork
+                .GetRepository<Person>()
+                .GetPagedList(include: person => person.Include(x => x.Address).Include(x => x.User)).Items
+                .Where(x => x.UserId == userFounded.Id)
+                .FirstOrDefault();
+
+            if (person == null) return null;
 
             var jwtToken = GenerateTokenBasedInUser(person, timeToExpire);
 

@@ -52,8 +52,7 @@ namespace WheresNannyApi.Application.Services
                 new Address(
                     userRegisterDto.Cep,
                     userRegisterDto.HouseNumber is null ? "" : userRegisterDto.HouseNumber,
-                    userRegisterDto.Complement is null ? "" : userRegisterDto.Complement,
-                    currentPerson.Id
+                    userRegisterDto.Complement is null ? "" : userRegisterDto.Complement
                 );
 
             await _repository.AddAsync(address);

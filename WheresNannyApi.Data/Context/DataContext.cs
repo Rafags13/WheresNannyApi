@@ -74,13 +74,14 @@ namespace WheresNannyApi.Data.Context
                     .HasColumnType("varchar(max)")
                     .IsRequired();
 
-                entity.HasOne(x => x.Address)
-                    .WithOne(y => y.Person)
-                    .HasForeignKey<Address>(y => y.PersonId);
-
                 entity.HasOne(x => x.Nanny)
                     .WithOne(y => y.Person)
                     .HasForeignKey<Nanny>(y => y.PersonId);
+
+                entity.HasOne(x => x.Address)
+                    .WithMany(x => x.PersonsWhoHasThisAddress)
+                    .HasForeignKey(x => x.AddressId)
+                    .OnDelete(DeleteBehavior.Restrict);
 
             });
 

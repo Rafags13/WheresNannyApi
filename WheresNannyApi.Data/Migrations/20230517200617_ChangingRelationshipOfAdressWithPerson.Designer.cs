@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using WheresNannyApi.Data.Context;
 
@@ -11,9 +12,10 @@ using WheresNannyApi.Data.Context;
 namespace WheresNannyApi.Data.Migrations
 {
     [DbContext(typeof(DataContext))]
-    partial class DataContextModelSnapshot : ModelSnapshot
+    [Migration("20230517200617_ChangingRelationshipOfAdressWithPerson")]
+    partial class ChangingRelationshipOfAdressWithPerson
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -310,7 +312,7 @@ namespace WheresNannyApi.Data.Migrations
                     b.HasOne("WheresNannyApi.Domain.Entities.Address", "Address")
                         .WithMany("PersonsWhoHasThisAddress")
                         .HasForeignKey("AddressId")
-                        .OnDelete(DeleteBehavior.Restrict)
+                        .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
                     b.HasOne("WheresNannyApi.Domain.Entities.User", "User")

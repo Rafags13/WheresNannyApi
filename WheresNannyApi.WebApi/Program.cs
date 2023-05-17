@@ -1,3 +1,4 @@
+using Arch.EntityFrameworkCore.UnitOfWork;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
@@ -25,6 +26,7 @@ builder.Services.AddScoped<IPersonService, PersonService>();
 builder.Services.AddScoped<IServicesService, ServicesService>();
 
 builder.Services.AddGenericRepository<DataContext>();
+builder.Services.AddUnitOfWork<DataContext>();
 
 builder.Services.AddControllers();
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle

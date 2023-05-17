@@ -12,8 +12,8 @@ using WheresNannyApi.Data.Context;
 namespace WheresNannyApi.Data.Migrations
 {
     [DbContext(typeof(DataContext))]
-    [Migration("20230515141005_UpdateNannyTable")]
-    partial class UpdateNannyTable
+    [Migration("20230517204901_RemovingPersonFromAddressTryingAgain")]
+    partial class RemovingPersonFromAddressTryingAgain
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
@@ -42,13 +42,7 @@ namespace WheresNannyApi.Data.Migrations
                     b.Property<string>("HouseNumber")
                         .HasColumnType("varchar(4)");
 
-                    b.Property<int>("PersonId")
-                        .HasColumnType("int");
-
                     b.HasKey("Id");
-
-                    b.HasIndex("PersonId")
-                        .IsUnique();
 
                     b.ToTable("Addresses", (string)null);
                 });
@@ -64,10 +58,10 @@ namespace WheresNannyApi.Data.Migrations
                     b.Property<string>("Comment")
                         .HasColumnType("varchar(50)");
 
-                    b.Property<int>("NannyWhoRecieveTheCommentId")
+                    b.Property<int?>("NannyWhoRecieveTheCommentId")
                         .HasColumnType("int");
 
-                    b.Property<int>("PersonWhoCommentId")
+                    b.Property<int?>("PersonWhoCommentId")
                         .HasColumnType("int");
 
                     b.Property<float>("RankStarsCounting")
@@ -165,6 +159,9 @@ namespace WheresNannyApi.Data.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"), 1L, 1);
 
+                    b.Property<int>("AddressId")
+                        .HasColumnType("int");
+
                     b.Property<DateTime>("BirthdayDate")
                         .HasColumnType("datetime");
 
@@ -192,6 +189,8 @@ namespace WheresNannyApi.Data.Migrations
                         .HasColumnType("int");
 
                     b.HasKey("Id");
+
+                    b.HasIndex("AddressId");
 
                     b.HasIndex("UserId")
                         .IsUnique();
@@ -261,30 +260,17 @@ namespace WheresNannyApi.Data.Migrations
                     b.ToTable("Users", (string)null);
                 });
 
-            modelBuilder.Entity("WheresNannyApi.Domain.Entities.Address", b =>
-                {
-                    b.HasOne("WheresNannyApi.Domain.Entities.Person", "Person")
-                        .WithOne("Address")
-                        .HasForeignKey("WheresNannyApi.Domain.Entities.Address", "PersonId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("Person");
-                });
-
             modelBuilder.Entity("WheresNannyApi.Domain.Entities.CommentRank", b =>
                 {
                     b.HasOne("WheresNannyApi.Domain.Entities.Nanny", "NannyWhoRecieveTheComment")
                         .WithMany("CommentsRankNanny")
                         .HasForeignKey("NannyWhoRecieveTheCommentId")
-                        .OnDelete(DeleteBehavior.Restrict)
-                        .IsRequired();
+                        .OnDelete(DeleteBehavior.Restrict);
 
                     b.HasOne("WheresNannyApi.Domain.Entities.Person", "PersonWhoComment")
                         .WithMany("CommentsRank")
                         .HasForeignKey("PersonWhoCommentId")
-                        .OnDelete(DeleteBehavior.Restrict)
-                        .IsRequired();
+                        .OnDelete(DeleteBehavior.Restrict);
 
                     b.Navigation("NannyWhoRecieveTheComment");
 
@@ -323,11 +309,19 @@ namespace WheresNannyApi.Data.Migrations
 
             modelBuilder.Entity("WheresNannyApi.Domain.Entities.Person", b =>
                 {
+                    b.HasOne("WheresNannyApi.Domain.Entities.Address", "Address")
+                        .WithMany("PersonsWhoHasThisAddress")
+                        .HasForeignKey("AddressId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
                     b.HasOne("WheresNannyApi.Domain.Entities.User", "User")
                         .WithOne("Person")
                         .HasForeignKey("WheresNannyApi.Domain.Entities.Person", "UserId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
+
+                    b.Navigation("Address");
 
                     b.Navigation("User");
                 });
@@ -351,6 +345,11 @@ namespace WheresNannyApi.Data.Migrations
                     b.Navigation("PersonService");
                 });
 
+            modelBuilder.Entity("WheresNannyApi.Domain.Entities.Address", b =>
+                {
+                    b.Navigation("PersonsWhoHasThisAddress");
+                });
+
             modelBuilder.Entity("WheresNannyApi.Domain.Entities.DocumentType", b =>
                 {
                     b.Navigation("DocumentsWhoHaveThisDocumentType");
@@ -365,8 +364,6 @@ namespace WheresNannyApi.Data.Migrations
 
             modelBuilder.Entity("WheresNannyApi.Domain.Entities.Person", b =>
                 {
-                    b.Navigation("Address");
-
                     b.Navigation("CommentsRank");
 
                     b.Navigation("Nanny");

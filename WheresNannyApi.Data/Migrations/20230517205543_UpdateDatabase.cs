@@ -4,7 +4,7 @@
 
 namespace WheresNannyApi.Data.Migrations
 {
-    public partial class UpdateNannyTable : Migration
+    public partial class UpdateDatabase : Migration
     {
         protected override void Up(MigrationBuilder migrationBuilder)
         {

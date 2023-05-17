@@ -37,6 +37,7 @@ namespace WheresNannyApi.Domain.Entities
         public string ImageUri { get; set; } = String.Empty;
         public int UserId { get; set; }
         public User? User { get; set; }
+        public int AddressId { get; set; }
         public Address? Address { get; set; }
         public Nanny? Nanny { get; set; }
         public ICollection<Service>? ServicesPerson { get; set; }
