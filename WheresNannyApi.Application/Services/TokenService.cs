@@ -64,6 +64,10 @@ namespace WheresNannyApi.Application.Services
 
             DateTime timeToExpire = DateTime.UtcNow.AddMinutes(5);
 
+
+            var addresses = _unitOfWork
+                .GetRepository<Address>().GetPagedList().Items;
+
             var person = _unitOfWork
                 .GetRepository<Person>()
                 .GetPagedList(include: person => person.Include(x => x.Address).Include(x => x.User)).Items

@@ -24,14 +24,27 @@ namespace WheresNannyApi.Application.Services
         {
             var userExists = await UserExists(userRegisterDto.Username) || await PersonExists(userRegisterDto.Email);
 
-            if (userExists) return "O usuário informado já está cadastrado no sistema. ";
+            if (userExists) return "O usuário informado já está cadastrado no sistema.";
 
             var user = new User(userRegisterDto.Username, userRegisterDto.Password);
             await _repository.AddAsync(user);
             await _repository.SaveChangesAsync();
 
-            var currentUser = await _repository.GetAsync<User>(x => x.Username == userRegisterDto.Username);
+            var addressExists = await AddressExists(userRegisterDto.Cep);
+            if (!addressExists)
+            {
+                var address = new Address(
+                   userRegisterDto.Cep,
+                   userRegisterDto.HouseNumber is null ? "" : userRegisterDto.HouseNumber,
+                   userRegisterDto.Complement is null ? "" : userRegisterDto.Complement
+               );
 
+                await _repository.AddAsync(address);
+                await _repository.SaveChangesAsync();
+            }
+
+            var currentUser = await _repository.GetAsync<User>(x => x.Username == userRegisterDto.Username);
+            var currentAddress = await _repository.GetAsync<Address>(x => x.Cep == userRegisterDto.Cep);
             var person = 
                 new Person(
                         userRegisterDto.Fullname,
@@ -40,22 +53,11 @@ namespace WheresNannyApi.Application.Services
                         userRegisterDto.BirthdayDate,
                         userRegisterDto.Cpf,
                         userRegisterDto.ImageUri,
-                        currentUser.Id
+                        currentUser.Id,
+                        currentAddress.Id
                     );
 
             await _repository.AddAsync(person);
-            await _repository.SaveChangesAsync();
-
-            var currentPerson = await _repository.GetAsync<Person>(x => x.UserId == currentUser.Id);
-
-            var address = 
-                new Address(
-                    userRegisterDto.Cep,
-                    userRegisterDto.HouseNumber is null ? "" : userRegisterDto.HouseNumber,
-                    userRegisterDto.Complement is null ? "" : userRegisterDto.Complement
-                );
-
-            await _repository.AddAsync(address);
             await _repository.SaveChangesAsync();
 
             return "";
@@ -73,6 +75,13 @@ namespace WheresNannyApi.Application.Services
             var person = await _repository.GetAsync<Person>(x => x.Email == email);
 
             return person != null;
+        }
+
+        public async Task<bool> AddressExists(string cep)
+        {
+            var address = await _repository.GetAsync<Address>(x => x.Cep == cep);
+
+            return address != null;
         }
         #endregion
 

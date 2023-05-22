@@ -15,7 +15,8 @@ namespace WheresNannyApi.Domain.Entities
             DateTime birthdayDate, 
             string cpf,
             string imageUri,
-            int userId
+            int userId,
+            int addressId
             ) 
         {
             Fullname = fullname;
@@ -25,6 +26,7 @@ namespace WheresNannyApi.Domain.Entities
             Cpf = cpf;
             ImageUri = imageUri;
             UserId = userId;
+            AddressId = addressId;
         }
 
         public Person() { }
@@ -41,7 +43,7 @@ namespace WheresNannyApi.Domain.Entities
         public Address? Address { get; set; }
         public Nanny? Nanny { get; set; }
         public ICollection<Service>? ServicesPerson { get; set; }
-        public ICollection<CommentRank> CommentsRank { get; set; }
-        public ICollection<Document> PersonDocuments { get; set; }
+        public ICollection<CommentRank>? CommentsRank { get; set; }
+        public ICollection<Document>? PersonDocuments { get; set; }
     }
 }

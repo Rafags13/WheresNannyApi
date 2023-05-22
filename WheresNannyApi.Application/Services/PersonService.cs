@@ -30,7 +30,6 @@ namespace WheresNannyApi.Application.Services
 
             var nannysReference = await _repository.GetListAsync<Nanny>();
             var nannysListOrderedByNearCep = NannyListOrderedByNearCep(findCommonUserServicesDto.Cep);
-            //var nannysListOrderedByRankStars = nannysReference.OrderBy(x => x.RankAvegerageStars).Take(2).ToList();
 
             var mostRecentService = servicesFilteredByPerson.OrderByDescending(x => x.HiringDate).First();
 
