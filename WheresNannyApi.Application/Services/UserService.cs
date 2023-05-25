@@ -101,14 +101,14 @@ namespace WheresNannyApi.Application.Services
             await _repository.SaveChangesAsync();
 
             var registerNannyDocuments = new NannyRegisterDocumentDto(currentPerson.Id, nannyRegisterDto.Base64CriminalRecord, nannyRegisterDto.Base64ProofOfAddress);
-            AddDocumentsFromNannyPerson(registerNannyDocuments);
+            await AddDocumentsFromNannyPerson(registerNannyDocuments);
 
-            AddDefaultCommentToFirstRegisterNanny(currentPerson.Id);
+            await AddDefaultCommentToFirstRegisterNanny(currentPerson.Id);
 
             return "";
         }
 
-        public async void AddDocumentsFromNannyPerson(NannyRegisterDocumentDto nannyRegisterDocumentDto)
+        public async Task AddDocumentsFromNannyPerson(NannyRegisterDocumentDto nannyRegisterDocumentDto)
         {
             var criminalRecordDocumentType = await _repository.GetAsync<DocumentType>(x => x.Name == "Antecedente Criminal");
             var proofOfAddressDocumentType = await _repository.GetAsync<DocumentType>(x => x.Name == "Comprovante de residencia");
@@ -126,7 +126,7 @@ namespace WheresNannyApi.Application.Services
             await _repository.SaveChangesAsync();
         }
 
-        public async void AddDefaultCommentToFirstRegisterNanny(int personId)
+        public async Task AddDefaultCommentToFirstRegisterNanny(int personId)
         {
             var defaultFirstComment = new CommentRank();
             defaultFirstComment.RankStarsCounting = 5.0f;

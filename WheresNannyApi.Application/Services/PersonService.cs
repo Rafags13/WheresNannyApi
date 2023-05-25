@@ -26,17 +26,16 @@ namespace WheresNannyApi.Application.Services
         public async Task<UserHomeInformationDto> GetUserMainPageInformation(FindCommonUserServicesDto findCommonUserServicesDto)
         {
             var servicesReference = await _repository.GetListAsync<Service>();
-            var servicesFilteredByPerson = servicesReference.Where(x => x.PersonId == findCommonUserServicesDto.PersonId).ToList();
+            var servicesFilteredByPerson = servicesReference.Where(x => x.PersonId == findCommonUserServicesDto.PersonId);
 
             var nannysReference = await _repository.GetListAsync<Nanny>();
             var nannysListOrderedByNearCep = NannyListOrderedByNearCep(findCommonUserServicesDto.Cep);
 
-            var mostRecentService = servicesFilteredByPerson.OrderByDescending(x => x.HiringDate).First();
+            var mostRecentService = servicesFilteredByPerson.Count() > 0 ? servicesFilteredByPerson.OrderByDescending(x => x.HiringDate).First() : null;
 
             var data = new UserHomeInformationDto
             {
-                ServicesFilteredByPerson = servicesFilteredByPerson,
-                NannysListOrderedByRankStarts = nannysListOrderedByNearCep,
+                NannyListOrderedByFilter = nannysListOrderedByNearCep,
                 MostRecentService = mostRecentService,
             };
 

@@ -9,8 +9,7 @@ namespace WheresNannyApi.Domain.Entities.Dto
     public class UserHomeInformationDto
     {
         public UserHomeInformationDto() { }
-        public List<Service>? ServicesFilteredByPerson { get; set; }
-        public List<Nanny>? NannysListOrderedByRankStarts { get; set; }
+        public List<Nanny>? NannyListOrderedByFilter { get; set; }
         public Service? MostRecentService { get; set; }
 
     }

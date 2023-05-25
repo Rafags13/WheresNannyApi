@@ -18,14 +18,20 @@ namespace WheresNannyApi.WebApi.Controllers
         [HttpPost("GetUserHomeInformation")]
         public async Task<IActionResult> GetUserMainPageInformation(FindCommonUserServicesDto findCommonUserServicesDto)
         {
-            var nannys = await _personService.GetUserMainPageInformation(findCommonUserServicesDto);
-
-            if(nannys == null)
+            try
             {
-                return BadRequest("Algo de errado aconteceu durante a pesquisa dos seus dados.");
-            }
+                var nannys = await _personService.GetUserMainPageInformation(findCommonUserServicesDto);
 
-            return Ok(nannys);
+                if (nannys == null)
+                {
+                    return BadRequest("Algo de errado aconteceu durante a pesquisa dos seus dados.");
+                }
+
+                return Ok(nannys);
+            } catch (Exception ex)
+            {
+                return BadRequest(ex.Message);
+            }
         }
     }
 }
