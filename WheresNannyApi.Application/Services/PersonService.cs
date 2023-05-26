@@ -22,13 +22,13 @@ namespace WheresNannyApi.Application.Services
             _repository = repository;
             _unitOfWork = unitOfWork;
         }
+        #region Common User Home Information
 
         public async Task<UserHomeInformationDto> GetUserMainPageInformation(FindCommonUserServicesDto findCommonUserServicesDto)
         {
             var servicesReference = await _repository.GetListAsync<Service>();
             var servicesFilteredByPerson = servicesReference.Where(x => x.PersonId == findCommonUserServicesDto.PersonId);
 
-            var nannysReference = await _repository.GetListAsync<Nanny>();
             var nannysListOrderedByNearCep = NannyListOrderedByNearCep(findCommonUserServicesDto.Cep);
 
             var mostRecentService = servicesFilteredByPerson.Count() > 0 ? servicesFilteredByPerson.OrderByDescending(x => x.HiringDate).First() : null;
@@ -43,17 +43,34 @@ namespace WheresNannyApi.Application.Services
 
         }
 
-        private List<Nanny> NannyListOrderedByNearCep(string cep)
+        private List<NannyCardDto> NannyListOrderedByNearCep(string cep)
         {
             var nannysReference = _unitOfWork.GetRepository<Nanny>()
                 .GetPagedList(include: x => x
                     .Include(x => x.Person)
                         .ThenInclude(x => x.Address)
-                    .Include(x => x.Person)).Items;
+                    .Include(x => x.Person)
+                    .Include(x => x.CommentsRankNanny)
+                    ).Items;
 
             nannysReference.Select(x => x.Person?.Address?.Cep).ToList().Sort((a, b) => Math.Abs(int.Parse(cep) - int.Parse(a)) - Math.Abs(int.Parse(cep) - int.Parse(b)));
 
-            return nannysReference.ToList();
+            var nannyCardDtoList = new List<NannyCardDto>();
+
+            foreach (var nanny in nannysReference)
+            {
+                nannyCardDtoList.Add(new NannyCardDto
+                {
+                    Id = nanny.Id,
+                    Fullname = nanny.Person.Fullname,
+                    StarsCounting = nanny.RankAvegerageStars,
+                    RankCommentCount = nanny.RankCommentCount,
+                    ImageUri = nanny.Person.ImageUri
+                });
+            }
+
+            return nannyCardDtoList;
         }
+        #endregion
     }
 }

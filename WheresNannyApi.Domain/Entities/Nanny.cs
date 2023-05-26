@@ -29,8 +29,19 @@ namespace WheresNannyApi.Domain.Entities
         {
             get {
                 var average = CommentsRankNanny?.Select(x => x.RankStarsCounting);
-                return average is null ? 0.0f : average.Average(); }
+                return average == null ? 0.0f : average.Average(); }
             set { RankAvegerageStars = value; }
+        }
+
+        [NotMapped]
+        public int RankCommentCount
+        {
+            get
+            {
+                var count = CommentsRankNanny?.Where(x => x.Comment != "").Count();
+                return count ?? default(int);
+            }
+            set { RankCommentCount = value; }
         }
     }
 }

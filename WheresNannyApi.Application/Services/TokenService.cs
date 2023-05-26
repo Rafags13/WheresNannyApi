@@ -28,34 +28,7 @@ namespace WheresNannyApi.Application.Services
             _configuration = configuration;
             _unitOfWork = unitOfWork;
         }
-
-        public string GenerateTokenBasedInUser(Person person, DateTime timeToExpire)
-        {
-            var key = Encoding.ASCII.GetBytes(_configuration.GetValue<string>("JWt:Key"));
-
-            var tokenDescriptor = new SecurityTokenDescriptor
-            {
-                Subject = new ClaimsIdentity(new[]
-            {
-                new Claim("id", person.User.Id.ToString()),
-                new Claim("imageUri", person.ImageUri),
-                new Claim("username", person.User.Username),
-                new Claim(JwtRegisteredClaimNames.Email, person.Email),
-                new Claim("cep", person.Address.Cep)
-             }),
-                Expires = timeToExpire,
-                SigningCredentials = new SigningCredentials
-            (new SymmetricSecurityKey(key),
-            SecurityAlgorithms.HmacSha512Signature)
-            };
-            var tokenHandler = new JwtSecurityTokenHandler();
-            var token = tokenHandler.CreateToken(tokenDescriptor);
-
-            var stringToken = tokenHandler.WriteToken(token);
-
-            return stringToken;
-        }
-
+        #region Login User
         public async Task<string> Login(UserLoginDto user)
         {
             var userFounded = await _repository.GetAsync<User>(x => x.Username == user.Username && x.Password == user.Password);
@@ -87,5 +60,33 @@ namespace WheresNannyApi.Application.Services
 
             return jwtToken;
         }
+
+        public string GenerateTokenBasedInUser(Person person, DateTime timeToExpire)
+        {
+            var key = Encoding.ASCII.GetBytes(_configuration.GetValue<string>("JWt:Key"));
+
+            var tokenDescriptor = new SecurityTokenDescriptor
+            {
+                Subject = new ClaimsIdentity(new[]
+            {
+                new Claim("id", person.User.Id.ToString()),
+                new Claim("imageUri", person.ImageUri),
+                new Claim("username", person.User.Username),
+                new Claim(JwtRegisteredClaimNames.Email, person.Email),
+                new Claim("cep", person.Address.Cep)
+             }),
+                Expires = timeToExpire,
+                SigningCredentials = new SigningCredentials
+            (new SymmetricSecurityKey(key),
+            SecurityAlgorithms.HmacSha512Signature)
+            };
+            var tokenHandler = new JwtSecurityTokenHandler();
+            var token = tokenHandler.CreateToken(tokenDescriptor);
+
+            var stringToken = tokenHandler.WriteToken(token);
+
+            return stringToken;
+        }
+#endregion
     }
 }

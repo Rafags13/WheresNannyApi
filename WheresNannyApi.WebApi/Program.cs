@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using System.Text;
+using System.Text.Json.Serialization;
 using TanvirArjel.EFCore.GenericRepository;
 using WheresNannyApi.Application.Interfaces;
 using WheresNannyApi.Application.Services;
@@ -50,6 +51,11 @@ builder.Services.AddAuthentication(authenticationOptions =>
     };
 });
 builder.Services.AddAuthorization();
+builder.Services.AddControllers().AddJsonOptions(options =>
+{
+    options.JsonSerializerOptions.ReferenceHandler = ReferenceHandler.IgnoreCycles;
+    options.JsonSerializerOptions.WriteIndented = true;
+});
 
 var app = builder.Build();
 
