@@ -29,7 +29,11 @@ namespace WheresNannyApi.Application.Services
             var servicesReference = await _repository.GetListAsync<Service>();
             var servicesFilteredByPerson = servicesReference.Where(x => x.PersonId == findCommonUserServicesDto.PersonId);
 
-            var nannyListOrderedByNearCep = NannyListOrderedByFilter("location", findCommonUserServicesDto.Cep);
+            var nannyListOrderedByNearCep = NannyListOrderedByFilter(
+                new ChangeNannyListByFilterDto {
+                    Filter = "location",
+                    Cep = findCommonUserServicesDto.Cep
+                });
 
             var mostRecentService = servicesFilteredByPerson.Count() > 0 ? servicesFilteredByPerson.OrderByDescending(x => x.HiringDate).First() : null;
 
@@ -42,7 +46,7 @@ namespace WheresNannyApi.Application.Services
             return data;
         }
 
-        private List<NannyCardDto> NannyListOrderedByFilter(string filter, string cep = "")
+        public List<NannyCardDto> NannyListOrderedByFilter(ChangeNannyListByFilterDto changeNannyListByFilterDto)
         {
             var nannysReference = _unitOfWork.GetRepository<Nanny>()
                 .GetPagedList(include: x => x
@@ -52,9 +56,9 @@ namespace WheresNannyApi.Application.Services
                     .Include(x => x.CommentsRankNanny)
                     ).Items;
 
-            var nannysReferenceOrderedByFilter = filter switch
+            var nannysReferenceOrderedByFilter = changeNannyListByFilterDto.Filter switch
             {
-                "location" => NannyListOrderedByNearCep(nannysReference, cep),
+                "location" => NannyListOrderedByNearCep(nannysReference, changeNannyListByFilterDto.Cep),
                 "price" => NannyListOrderedByPrice(nannysReference),
                 "rank" => NannyListOrderedByRank(nannysReference),
                 _ => nannysReference.ToList()

@@ -11,5 +11,6 @@ namespace WheresNannyApi.Application.Interfaces
     public interface IPersonService
     {
         Task<UserHomeInformationDto> GetUserMainPageInformation(FindCommonUserServicesDto findCommonUserServicesDto);
+        List<NannyCardDto> NannyListOrderedByFilter(ChangeNannyListByFilterDto changeNannyListByFilterDto);
     }
 }

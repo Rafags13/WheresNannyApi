@@ -33,5 +33,25 @@ namespace WheresNannyApi.WebApi.Controllers
                 return BadRequest(ex.Message);
             }
         }
+
+        [HttpPost("ChangeNannyListByFilter")]
+        public IActionResult ChangeNannyListByFilter(ChangeNannyListByFilterDto changeNannyListByFilterDto)
+        {
+            try
+            {
+                var nannyList = _personService.NannyListOrderedByFilter(changeNannyListByFilterDto);
+
+                if(nannyList == null)
+                {
+                    return BadRequest("Algo de errado aconteceu durante a listagem das babas. Feche e abra novamente o aplicativo..");
+                }
+
+                return Ok(nannyList);
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(ex.Message);
+            }
+        }
     }
 }
