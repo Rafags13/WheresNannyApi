@@ -29,21 +29,20 @@ namespace WheresNannyApi.Application.Services
             var servicesReference = await _repository.GetListAsync<Service>();
             var servicesFilteredByPerson = servicesReference.Where(x => x.PersonId == findCommonUserServicesDto.PersonId);
 
-            var nannysListOrderedByNearCep = NannyListOrderedByNearCep(findCommonUserServicesDto.Cep);
+            var nannyListOrderedByNearCep = NannyListOrderedByFilter("location", findCommonUserServicesDto.Cep);
 
             var mostRecentService = servicesFilteredByPerson.Count() > 0 ? servicesFilteredByPerson.OrderByDescending(x => x.HiringDate).First() : null;
 
             var data = new UserHomeInformationDto
             {
-                NannyListOrderedByFilter = nannysListOrderedByNearCep,
+                NannyListOrderedByFilter = nannyListOrderedByNearCep,
                 MostRecentService = mostRecentService,
             };
 
             return data;
-
         }
 
-        private List<NannyCardDto> NannyListOrderedByNearCep(string cep)
+        private List<NannyCardDto> NannyListOrderedByFilter(string filter, string cep = "")
         {
             var nannysReference = _unitOfWork.GetRepository<Nanny>()
                 .GetPagedList(include: x => x
@@ -53,8 +52,49 @@ namespace WheresNannyApi.Application.Services
                     .Include(x => x.CommentsRankNanny)
                     ).Items;
 
-            nannysReference.Select(x => x.Person?.Address?.Cep).ToList().Sort((a, b) => Math.Abs(int.Parse(cep) - int.Parse(a)) - Math.Abs(int.Parse(cep) - int.Parse(b)));
+            var nannysReferenceOrderedByFilter = filter switch
+            {
+                "location" => NannyListOrderedByNearCep(nannysReference, cep),
+                "price" => NannyListOrderedByPrice(nannysReference),
+                "rank" => NannyListOrderedByRank(nannysReference),
+                _ => nannysReference.ToList()
+            };
 
+            var listNannyCardObject = CreateModelNannyCardObject(nannysReferenceOrderedByFilter);
+
+            return listNannyCardObject;
+        }
+
+        private List<Nanny> NannyListOrderedByNearCep(IList<Nanny>? nannies, string cep)
+        {
+            if (nannies is null) return new List<Nanny>();
+
+            nannies.Select(x => x.Person?.Address?.Cep).ToList().Sort((a, b) => Math.Abs(int.Parse(cep) - int.Parse(a)) - Math.Abs(int.Parse(cep) - int.Parse(b)));
+
+            return nannies.ToList();
+        }
+
+        private List<Nanny> NannyListOrderedByRank(IList<Nanny>? nannies)
+        {
+            if (nannies is null) return new List<Nanny>();
+
+            var nannyOrdered = nannies.OrderByDescending(x => x.RankAvegerageStars).ToList();
+
+            return nannyOrdered;
+
+        }
+
+        private List<Nanny> NannyListOrderedByPrice(IList<Nanny>? nannies)
+        {
+            if (nannies is null) return new List<Nanny>();
+
+            var nannyOrdered = nannies.OrderBy(x => x.ServicePrice).ToList();
+
+            return nannyOrdered;
+        }
+
+        private List<NannyCardDto> CreateModelNannyCardObject(List<Nanny> nannysReference)
+        {
             var nannyCardDtoList = new List<NannyCardDto>();
 
             foreach (var nanny in nannysReference)
@@ -72,5 +112,7 @@ namespace WheresNannyApi.Application.Services
             return nannyCardDtoList;
         }
         #endregion
+
+
     }
 }
