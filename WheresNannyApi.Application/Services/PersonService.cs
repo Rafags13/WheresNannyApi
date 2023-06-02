@@ -117,6 +117,19 @@ namespace WheresNannyApi.Application.Services
         }
         #endregion
 
+        public Nanny? GetNannyInfoToContractById(int id)
+        {
+            var nanny =
+                _unitOfWork.GetRepository<Nanny>()
+                .GetPagedList(
+                    include: x =>
+                        x.Include(x => x.Person)
+                        .Include(x => x.CommentsRankNanny))
+                .Items
+                .Where(x => x.Id == id)
+                .FirstOrDefault();
 
+            return nanny;
+        }
     }
 }

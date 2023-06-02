@@ -53,5 +53,26 @@ namespace WheresNannyApi.WebApi.Controllers
                 return BadRequest(ex.Message);
             }
         }
+
+        [HttpGet("GetNannyById/{id}")]
+        public IActionResult GetNannyInfoToContractById([FromRoute] int id)
+        {
+            try
+            {
+                var nanny = _personService.GetNannyInfoToContractById(id);
+
+                if(nanny == null)
+                {
+                    return BadRequest("Não foi possível encontrar a babá requerida. Por favor, tente novamente.");
+                }
+
+                return Ok(nanny);
+
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(ex.Message);
+            }
+        }
     }
 }
