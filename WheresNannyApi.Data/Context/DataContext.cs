@@ -104,6 +104,16 @@ namespace WheresNannyApi.Data.Context
                 entity.Property(x => x.Complement)
                     .HasColumnType("varchar(50)")
                     .IsRequired(false);
+
+                entity.Property(x => x.Latitude)
+                    .HasColumnType("float")
+                    .HasDefaultValue(0.0f)
+                    .IsRequired(false);
+
+                entity.Property(x => x.Longitude)
+                    .HasColumnType("float")
+                    .HasDefaultValue(0.0f)
+                    .IsRequired(false);
             });
 
             modelBuilder.Entity<Service>(entity =>

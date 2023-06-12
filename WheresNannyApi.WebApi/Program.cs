@@ -10,6 +10,7 @@ using WheresNannyApi.Application.Services;
 using WheresNannyApi.Data.Context;
 
 var builder = WebApplication.CreateBuilder(args);
+builder.Services.AddHttpClient();
 
 // Add services to the container.
 

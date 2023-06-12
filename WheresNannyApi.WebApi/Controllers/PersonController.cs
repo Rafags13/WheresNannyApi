@@ -54,12 +54,12 @@ namespace WheresNannyApi.WebApi.Controllers
             }
         }
 
-        [HttpGet("GetNannyById/{id}")]
-        public IActionResult GetNannyInfoToContractById([FromRoute] int id)
+        [HttpGet("GetNannyById/{id}/{userId}")]
+        public IActionResult GetNannyInfoToContractById([FromRoute] int id, int userId)
         {
             try
             {
-                var nanny = _personService.GetNannyInfoToContractById(id);
+                var nanny = _personService.GetNannyInfoToContractById(id, userId);
 
                 if(nanny == null)
                 {

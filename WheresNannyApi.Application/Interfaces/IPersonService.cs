@@ -12,6 +12,6 @@ namespace WheresNannyApi.Application.Interfaces
     {
         Task<UserHomeInformationDto> GetUserMainPageInformation(FindCommonUserServicesDto findCommonUserServicesDto);
         List<NannyCardDto> NannyListOrderedByFilter(ChangeNannyListByFilterDto changeNannyListByFilterDto);
-        Nanny? GetNannyInfoToContractById(int id);
+        NannyContractDto GetNannyInfoToContractById(int id, int userId);
     }
 }

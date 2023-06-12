@@ -1,8 +1,10 @@
 ﻿using Microsoft.AspNetCore.Mvc;
+using Microsoft.Net.Http.Headers;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using System.Text.Json;
 using System.Threading.Tasks;
 using TanvirArjel.EFCore.GenericRepository;
 using WheresNannyApi.Application.Interfaces;
@@ -14,9 +16,11 @@ namespace WheresNannyApi.Application.Services
     public class UserService: IUserService
     {
         private readonly IRepository _repository;
-        public UserService(IRepository repository) 
+        private readonly IHttpClientFactory _httpClientFactory;
+        public UserService(IRepository repository, IHttpClientFactory httpClientFactory) 
         {
             _repository = repository;
+            _httpClientFactory = httpClientFactory;
         }
         #region Register User
 
@@ -33,14 +37,32 @@ namespace WheresNannyApi.Application.Services
             var addressExists = await AddressExists(userRegisterDto.Cep);
             if (!addressExists)
             {
-                var address = new Address(
-                   userRegisterDto.Cep,
-                   userRegisterDto.HouseNumber is null ? "" : userRegisterDto.HouseNumber,
-                   userRegisterDto.Complement is null ? "" : userRegisterDto.Complement
-               );
+                var httpRequestNannyUserCep = CreateRequestMessageForSpecificCep(userRegisterDto.Cep);
+                var httpClient = _httpClientFactory.CreateClient();
 
-                await _repository.AddAsync(address);
-                await _repository.SaveChangesAsync();
+                var requestNannyUser = await httpClient.SendAsync(httpRequestNannyUserCep);
+
+                if (requestNannyUser.IsSuccessStatusCode)
+                {
+                    var contentStreamNanny = await requestNannyUser.Content.ReadAsStreamAsync();
+
+                    var deserializeNanny = await JsonSerializer.DeserializeAsync<CepRequestDto>(contentStreamNanny) ?? new CepRequestDto();
+                    var address = new Address(
+                        userRegisterDto.Cep,
+                        userRegisterDto.HouseNumber is null ? "" : userRegisterDto.HouseNumber,
+                        userRegisterDto.Complement is null ? "" : userRegisterDto.Complement,
+                        float.Parse(deserializeNanny.latitude),
+                        float.Parse(deserializeNanny.longitude)
+                    );
+                    await _repository.AddAsync(address);
+                    await _repository.SaveChangesAsync();
+
+                    var nannyCepRequest = deserializeNanny;
+                }
+                else
+                {
+                    throw new Exception("Não foi possível encontrar o cep informado");
+                }
             }
 
             var currentUser = await _repository.GetAsync<User>(x => x.Username == userRegisterDto.Username);
@@ -82,6 +104,21 @@ namespace WheresNannyApi.Application.Services
             var address = await _repository.GetAsync<Address>(x => x.Cep == cep);
 
             return address != null;
+        }
+
+        private static HttpRequestMessage CreateRequestMessageForSpecificCep(string cep)
+        {
+            var httpRequestCurrentCep = new HttpRequestMessage(
+                HttpMethod.Get,
+                $"https://www.cepaberto.com/api/v3/cep?cep={cep}")
+            {
+                Headers =
+                {
+                   {HeaderNames.Authorization, "Token token=e8da46eb3abc34cd1f0ad500174abcd1" }
+                }
+            };
+
+            return httpRequestCurrentCep;
         }
         #endregion
 
