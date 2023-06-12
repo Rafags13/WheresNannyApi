@@ -27,12 +27,11 @@ namespace WheresNannyApi.WebApi.Controllers
             {
                 var token = await _tokenService.Login(user);
 
-                if(token == null) return NotFound($"Usuário: {user.Username} não foi encontrado no sistema.");
+                if(token == null) return NotFound("Usuário informado não foi encontrado no sistema ou a senha informada está incorreta.");
 
                 return Ok(token);
             } catch (Exception ex)
             {
-                
                 return BadRequest(ex.Message);
             }
         }
