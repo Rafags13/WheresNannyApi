@@ -43,7 +43,7 @@ namespace WheresNannyApi.Application.Services
 
             var person = _unitOfWork
                 .GetRepository<Person>()
-                .GetPagedList(include: person => person.Include(x => x.Address).Include(x => x.User)).Items
+                .GetPagedList(include: person => person.Include(x => x.Address).Include(x => x.User).Include(x => x.Nanny)).Items
                 .Where(x => x.UserId == userFounded.Id)
                 .FirstOrDefault();
 
@@ -73,7 +73,8 @@ namespace WheresNannyApi.Application.Services
                 new Claim("imageUri", person.ImageUri),
                 new Claim("username", person.User.Username),
                 new Claim(JwtRegisteredClaimNames.Email, person.Email),
-                new Claim("cep", person.Address.Cep)
+                new Claim("cep", person.Address.Cep),
+                new Claim("isNanny", person.Nanny is not null ? "true" : "false", ClaimValueTypes.Boolean)
              }),
                 Expires = timeToExpire,
                 SigningCredentials = new SigningCredentials
