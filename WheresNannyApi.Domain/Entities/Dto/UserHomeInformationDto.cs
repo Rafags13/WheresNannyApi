@@ -10,7 +10,7 @@ namespace WheresNannyApi.Domain.Entities.Dto
     {
         public UserHomeInformationDto() { }
         public List<NannyCardDto>? NannyListOrderedByFilter { get; set; }
-        public Service? MostRecentService { get; set; }
+        public RecentCardDto? MostRecentService { get; set; }
 
     }
 }
