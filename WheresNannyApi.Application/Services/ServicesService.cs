@@ -1,4 +1,7 @@
-﻿using System;
+﻿using Arch.EntityFrameworkCore.UnitOfWork;
+using Arch.EntityFrameworkCore.UnitOfWork.Collections;
+using Microsoft.EntityFrameworkCore;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -13,9 +16,11 @@ namespace WheresNannyApi.Application.Services
     public class ServicesService : IServicesService
     {
         private readonly IRepository _repository;
-        public ServicesService(IRepository repository) 
+        private readonly IUnitOfWork _unitOfWork;
+        public ServicesService(IRepository repository, IUnitOfWork unitOfWork) 
         {
             _repository = repository;
+            _unitOfWork = unitOfWork;
         }
         public async Task<bool> CreateService(CreateContractNannyDto createContractNannyDto)
         {
@@ -31,6 +36,26 @@ namespace WheresNannyApi.Application.Services
             await _repository.SaveChangesAsync();
 
             return true;
+        }
+
+        public List<RecentCardDto> ListAllServices(int userId, int pageIndex)
+        {
+            var allServicesFromUser =
+                _unitOfWork.GetRepository<Service>()
+                .GetPagedList(include: x =>
+                    x.Include(x => x.NannyService)
+                        .ThenInclude(x => x.Person)
+                    .Include(x => x.PersonService)
+                , pageIndex: pageIndex, pageSize: 10).Items
+                .Where(x => x.PersonId == userId)
+                .Select(x => new RecentCardDto { 
+                    PersonName = x.NannyService.Person.Fullname,
+                    ImageUri = x.NannyService.Person.ImageUri,
+                    ServiceId = x.Id,
+                    Date = x.HiringDate
+                }).OrderByDescending(x => x.Date).ToList();
+
+            return allServicesFromUser;
         }
     }
 }

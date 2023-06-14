@@ -10,5 +10,6 @@ namespace WheresNannyApi.Application.Interfaces
     public interface IServicesService
     {
         public Task<bool> CreateService(CreateContractNannyDto createContractNannyDto);
+        public List<RecentCardDto> ListAllServices(int userId, int pageIndex);
     }
 }

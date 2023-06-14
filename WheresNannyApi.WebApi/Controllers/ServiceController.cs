@@ -31,5 +31,23 @@ namespace WheresNannyApi.WebApi.Controllers
                 return BadRequest(ex.Message);
             }
         }
+
+        [HttpGet("GetAll/{userId}/{pageIndex}")]
+        public IActionResult GetServiceById([FromRoute] int userId, int pageIndex)
+        {
+            try 
+            { 
+                var allServicesByUser = _servicesService.ListAllServices(userId, pageIndex);
+                if(allServicesByUser is not null)
+                {
+                    return Ok(allServicesByUser);
+                }
+
+                return NotFound("Não foi possível localizar nenhum serviço");
+            } catch (Exception ex)
+            {
+                return BadRequest(ex.Message);
+            }
+        }
     }
 }

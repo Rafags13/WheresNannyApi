@@ -55,6 +55,7 @@ namespace WheresNannyApi.Application.Services
             var recentCardDto = new RecentCardDto
             {
                 PersonName = mostRecentService.NannyService.Person.Fullname,
+                ImageUri = mostRecentService.NannyService.Person.ImageUri,
                 ServiceId = mostRecentService.Id,
                 Date = mostRecentService.HiringDate
             };
