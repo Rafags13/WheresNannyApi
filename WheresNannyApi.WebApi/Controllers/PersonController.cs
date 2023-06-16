@@ -41,7 +41,7 @@ namespace WheresNannyApi.WebApi.Controllers
             {
                 var nannyList = _personService.NannyListOrderedByFilter(changeNannyListByFilterDto);
 
-                if(nannyList == null)
+                if (nannyList == null)
                 {
                     return BadRequest("Algo de errado aconteceu durante a listagem das babas. Feche e abra novamente o aplicativo..");
                 }
@@ -61,13 +61,33 @@ namespace WheresNannyApi.WebApi.Controllers
             {
                 var nanny = _personService.GetNannyInfoToContractById(id, userId);
 
-                if(nanny == null)
+                if (nanny == null)
                 {
                     return BadRequest("Não foi possível encontrar a babá requerida. Por favor, tente novamente.");
                 }
 
                 return Ok(nanny);
 
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(ex.Message);
+            }
+        }
+
+        [HttpGet("GetProfileInformation/{userId}")]
+        public IActionResult ProfileListInformation([FromRoute] int userId)
+        {
+            try
+            {
+                var profileListInformation = _personService.ProfileListInformation(userId);
+
+                if (profileListInformation == null)
+                {
+                    return BadRequest("O seu perfil não pode ser carregado. Tente novamente, mais tarde.");
+                }
+
+                return Ok(profileListInformation);
             }
             catch (Exception ex)
             {

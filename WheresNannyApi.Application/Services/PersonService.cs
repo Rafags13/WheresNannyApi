@@ -182,6 +182,29 @@ namespace WheresNannyApi.Application.Services
             return nannyContractInformation;
         }
 
-        
+        public UpdateProfileInformationDto? ProfileListInformation(int userId)
+        {
+            var person = _unitOfWork.GetRepository<Person>().GetPagedList(include: x => x.Include(x => x.Address)).Items.Where(x => x.UserId == userId).FirstOrDefault();
+            if (person == null) return null;
+
+            var updateProfileDto = new UpdateProfileInformationDto
+            {
+                AddressFromUpdateInformation = new AddressFromUpdateInformationDto
+                {
+                    Cep = person.Address.Cep,
+                    Complement = person.Address.Complement ?? "",
+                    Number = person.Address.HouseNumber ?? ""
+                },
+                PersonInformation = new PersonInformationDto
+                {
+                    Cpf = person.Cpf,
+                    Fullname = person.Fullname,
+                    Cellphone = person.Cellphone,
+                    Email = person.Email,
+                }
+            };
+
+            return updateProfileDto;
+        }
     }
 }
