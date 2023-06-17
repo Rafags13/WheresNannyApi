@@ -25,11 +25,13 @@ namespace WheresNannyApi.Application.Services
         private readonly IRepository _repository;
         private readonly IUnitOfWork _unitOfWork;
         private readonly IHttpClientFactory _httpClientFactory;
-        public PersonService(IRepository repository, IUnitOfWork unitOfWork, IHttpClientFactory httpClientFactory) 
+        private readonly IAddressService _addressService;
+        public PersonService(IRepository repository, IUnitOfWork unitOfWork, IHttpClientFactory httpClientFactory, IAddressService addressService) 
         { 
             _repository = repository;
             _unitOfWork = unitOfWork;
             _httpClientFactory = httpClientFactory;
+            _addressService = addressService;
         }
         #region Common User Home Information
 
@@ -205,6 +207,62 @@ namespace WheresNannyApi.Application.Services
             };
 
             return updateProfileDto;
+        }
+        public async Task<string> UpdateProfileInformation(UpdateProfileInformationDto updateProfileInformationDto)
+        {
+            var errorMessage = ReturnMessageIfUserCantBeUpdated(updateProfileInformationDto);
+            if(errorMessage != "") return errorMessage;
+
+            var personContext = _unitOfWork.GetRepository<Person>().GetPagedList(include: x => x.Include(x => x.Address)).Items;
+
+            var currentUser = personContext.Where(X => X.UserId == updateProfileInformationDto.PersonInformation.Id).FirstOrDefault();
+
+            currentUser.Fullname = updateProfileInformationDto.PersonInformation.Fullname;
+            currentUser.Cpf = updateProfileInformationDto.PersonInformation.Cpf;
+            currentUser.Email = updateProfileInformationDto.PersonInformation.Email;
+            currentUser.Cellphone = updateProfileInformationDto.PersonInformation.Cellphone;
+
+            var addressContext = _unitOfWork.GetRepository<Address>().GetPagedList().Items;
+            var currentAddress = addressContext.Where(x => x.Cep == updateProfileInformationDto.AddressFromUpdateInformation.Cep).FirstOrDefault();
+
+            var newAddressDontExistsYet = currentAddress == null;
+
+            if (newAddressDontExistsYet)
+            {
+                _addressService.CreateAddress(
+                    new CreateAddressDto
+                    {
+                        Cep = updateProfileInformationDto.AddressFromUpdateInformation.Cep,
+                        Complement = updateProfileInformationDto.AddressFromUpdateInformation.Complement,
+                        Number = updateProfileInformationDto.AddressFromUpdateInformation.Number
+                    });
+
+                var addressAfterAddedInSystem = addressContext.Where(x => x.Cep == updateProfileInformationDto.AddressFromUpdateInformation.Cep).FirstOrDefault();
+
+                currentUser.AddressId = addressAfterAddedInSystem.Id;
+            }
+            else
+            {
+                currentUser.AddressId = currentAddress.Id;
+            }
+
+            _repository.Update(currentUser);
+            await _repository.SaveChangesAsync();
+
+            return "";
+        }
+
+        private string ReturnMessageIfUserCantBeUpdated(UpdateProfileInformationDto updateProfileInformationDto)
+        {
+            var personContext = _unitOfWork.GetRepository<Person>().GetPagedList(include: x => x.Include(x => x.Address)).Items;
+
+            var cpfAlreadyExistsInSystem = personContext.Where(x => x.Cpf == updateProfileInformationDto.PersonInformation.Cpf && updateProfileInformationDto.PersonInformation.Id != x.UserId).FirstOrDefault();
+            if (cpfAlreadyExistsInSystem != null) return "Já existe uma pessoa cadastrada com esse CPF no sistema. Tente Novamente.";
+
+            var emailAlreadyExistsInSystem = personContext.Where(x => x.Email == updateProfileInformationDto.PersonInformation.Email && updateProfileInformationDto.PersonInformation.Id != x.UserId).FirstOrDefault();
+            if (emailAlreadyExistsInSystem != null) return "Já existe uma pessoa cadastrada com esse E-mail no sistema. Tente Novamente.";
+
+            return "";
         }
     }
 }

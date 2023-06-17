@@ -94,5 +94,26 @@ namespace WheresNannyApi.WebApi.Controllers
                 return BadRequest(ex.Message);
             }
         }
+
+        [HttpPut("UpdatePersonData")]
+        public async Task<IActionResult> UpdateProfile([FromBody] UpdateProfileInformationDto updateProfileInformationDto) 
+        {
+            try
+            {
+                var errorMessage = await _personService.UpdateProfileInformation(updateProfileInformationDto);
+
+                if (errorMessage != "")
+                {
+                    return BadRequest(errorMessage);
+                }
+
+                return Ok("Perfil atualizado com sucesso!");
+
+            }
+            catch (Exception ex)
+            { 
+                return BadRequest(ex.Message);
+            }
+        }
     }
 }
