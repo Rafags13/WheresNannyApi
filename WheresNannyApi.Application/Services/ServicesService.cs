@@ -42,7 +42,7 @@ namespace WheresNannyApi.Application.Services
         {
             var allServicesFromUser =
                 _unitOfWork.GetRepository<Service>()
-                .GetPagedList(include: x =>
+                .GetPagedList(orderBy: x => x.OrderByDescending(x => x.HiringDate), include: x =>
                     x.Include(x => x.NannyService)
                         .ThenInclude(x => x.Person)
                     .Include(x => x.PersonService)
