@@ -41,5 +41,24 @@ namespace WheresNannyApi.WebApi.Controllers
 
             return Conflict(errorMessage);
         }
+
+        [HttpPut("UpdatePassword")]
+        public async Task<IActionResult> UpdatePassword([FromBody] UpdatePasswordDto updatePasswordDto)
+        {
+            try
+            {
+                var errorMessage = await _userService.UpdatePassword(updatePasswordDto);
+
+                if(errorMessage == "")
+                {
+                    return Ok("Senha Alterada com sucesso");
+                }
+
+                return BadRequest(errorMessage);
+            } catch (Exception ex)
+            {
+                return BadRequest(ex.Message);
+            }
+        }
     }
 }

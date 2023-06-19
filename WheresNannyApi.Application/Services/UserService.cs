@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Arch.EntityFrameworkCore.UnitOfWork;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.Net.Http.Headers;
 using System;
 using System.Collections.Generic;
@@ -17,10 +18,12 @@ namespace WheresNannyApi.Application.Services
     {
         private readonly IRepository _repository;
         private readonly IHttpClientFactory _httpClientFactory;
-        public UserService(IRepository repository, IHttpClientFactory httpClientFactory) 
+        private readonly IUnitOfWork _unitOfWork;
+        public UserService(IRepository repository, IHttpClientFactory httpClientFactory, IUnitOfWork unitOfWork) 
         {
             _repository = repository;
             _httpClientFactory = httpClientFactory;
+            _unitOfWork = unitOfWork;
         }
         #region Register User
 
@@ -172,6 +175,30 @@ namespace WheresNannyApi.Application.Services
             await _repository.AddAsync(defaultFirstComment);
             await _repository.SaveChangesAsync();
         }
+        #endregion
+
+        #region UpdatePassword
+        public async Task<string> UpdatePassword(UpdatePasswordDto updatePasswordDto)
+        {
+            var personReference = _unitOfWork.GetRepository<User>().GetPagedList().Items.Where(x => x.Id == updatePasswordDto.UserId).FirstOrDefault();
+
+            if (personReference == null) return "Pessoa informada não foi encontrada no sistema. Tente Novamente";
+
+            var passwords = new { OldPassword = personReference.Password, Password = updatePasswordDto.OldPassword};
+            if (PasswordsDontMatch(passwords)) return "A senha informada não confere com a antiga. Por favor, tente novamente.";
+
+            personReference.Password = updatePasswordDto.NewPassword;
+            _repository.Update(personReference);
+            await _repository.SaveChangesAsync();
+            
+            return "";
+        }
+
+        public static bool PasswordsDontMatch(dynamic password)
+        {
+            return password.Password != password.OldPassword;
+        }
+
         #endregion
     }
 }
