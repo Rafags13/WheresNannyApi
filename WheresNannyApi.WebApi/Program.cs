@@ -27,6 +27,7 @@ builder.Services.AddScoped<IUserService, UserService>();
 builder.Services.AddScoped<IPersonService, PersonService>();
 builder.Services.AddScoped<IServicesService, ServicesService>();
 builder.Services.AddScoped<IAddressService, AddressService>();
+builder.Services.AddScoped<INannyService, NannyService>();
 
 builder.Services.AddGenericRepository<DataContext>();
 builder.Services.AddUnitOfWork<DataContext>();
