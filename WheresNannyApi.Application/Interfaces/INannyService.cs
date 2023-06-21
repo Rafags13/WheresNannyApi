@@ -9,6 +9,6 @@ namespace WheresNannyApi.Application.Interfaces
 {
     public interface INannyService
     {
-        public Task<List<ServiceNannyCardDto>> GetAllNannyServices(int userId);
+        public Task<List<ServiceNannyCardDto>> GetAllNannyServices(int userId, int pageIndex);
     }
 }

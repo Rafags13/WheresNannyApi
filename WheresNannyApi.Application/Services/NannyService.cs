@@ -22,7 +22,7 @@ namespace WheresNannyApi.Application.Services
             _repository = repository;
         }
 
-        public async Task<List<ServiceNannyCardDto>> GetAllNannyServices(int userId)
+        public async Task<List<ServiceNannyCardDto>> GetAllNannyServices(int userId, int pageIndex)
         {
             var currentNannyId =
                 _unitOfWork.GetRepository<Nanny>()
@@ -39,10 +39,11 @@ namespace WheresNannyApi.Application.Services
                     orderBy: x => x.OrderByDescending(x => x.HiringDate),
                     include: x =>
                     x.Include(x => x.PersonService),
-                    pageIndex: 0,
+                    pageIndex: pageIndex,
                     pageSize: 10
-                ).Items
-                .Select(x => new ServiceNannyCardDto {
+                ).Items.Where(x => x.NannyId == currentNannyId)
+                .Select(x => new ServiceNannyCardDto
+                {
                     ServiceId = x.Id,
                     HiringDate = x.HiringDate,
                     ClientName = x.PersonService.Fullname,

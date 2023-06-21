@@ -13,14 +13,14 @@ namespace WheresNannyApi.WebApi.Controllers
             _nannyService = nannyService;
         }
 
-        [HttpGet("GetAllServices/{userId}")]
-        public async Task<IActionResult> GetAllServices([FromRoute] int userId)
+        [HttpGet("GetAllServices/{userId}/{pageIndex}")]
+        public async Task<IActionResult> GetAllServices([FromRoute] int userId, int pageIndex)
         {
             try
             {
-                var services = await _nannyService.GetAllNannyServices(userId);
+                var services = await _nannyService.GetAllNannyServices(userId, pageIndex);
 
-                if (services.Count == 0) return NotFound("Nenhum serviço foi encontrado.");
+                if (services == null) return NotFound("Nenhum serviço foi encontrado.");
 
                 return Ok(services);
             } catch (Exception ex)
