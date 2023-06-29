@@ -91,7 +91,6 @@ namespace WheresNannyApi.Application.Services
 
             while (lastSixMonthsBefore <= DateTime.Now)
             {
-
                 string monthName = CultureInfo.CurrentCulture.DateTimeFormat.GetAbbreviatedMonthName(lastSixMonthsBefore.Month).ToUpper();
                 var countingService = serviceList.Where(x => x.HiringDate.Month == lastSixMonthsBefore.Month).Count();
                 monthNames.Add(monthName);
