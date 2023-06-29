@@ -1,5 +1,6 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using WheresNannyApi.Application.Interfaces;
+using WheresNannyApi.Domain.Entities.Dto;
 
 namespace WheresNannyApi.WebApi.Controllers
 {
@@ -23,6 +24,22 @@ namespace WheresNannyApi.WebApi.Controllers
                 if (services == null) return NotFound("Nenhum serviço foi encontrado.");
 
                 return Ok(services);
+            } catch (Exception ex)
+            {
+                return BadRequest(ex.Message);
+            }
+        }
+
+        [HttpGet("GetDashboardInformation/{userId}")]
+        public IActionResult GetNannyDashboardInformationDto(int userId)
+        {
+            try
+            {
+                var nannyDashboardInformation = _nannyService.GetNannyDashboardInformationDto(userId);
+
+                if (nannyDashboardInformation == null) return NotFound("Usuário não foi encontrado.");
+
+                return Ok(nannyDashboardInformation);
             } catch (Exception ex)
             {
                 return BadRequest(ex.Message);

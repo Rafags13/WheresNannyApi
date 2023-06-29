@@ -2,7 +2,9 @@
 using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.Linq;
+using System.Security.Cryptography.X509Certificates;
 using System.Text;
 using System.Threading.Tasks;
 using TanvirArjel.EFCore.GenericRepository;
@@ -20,6 +22,12 @@ namespace WheresNannyApi.Application.Services
         {
             _unitOfWork = unitOfWork;
             _repository = repository;
+        }
+
+        public Nanny GetNanny(int id)
+        {
+            var currentNanny = _unitOfWork.GetRepository<Nanny>().GetPagedList(include: x => x.Include(x => x.Person)).Items.Where(x => x.Person.UserId == id).FirstOrDefault();
+            return currentNanny ?? new Nanny();
         }
 
         public async Task<List<ServiceNannyCardDto>> GetAllNannyServices(int userId, int pageIndex)
@@ -52,6 +60,54 @@ namespace WheresNannyApi.Application.Services
 
 
             return currentServicesFromNanny;
+        }
+
+        public NannyDashboardInformationDto GetNannyDashboardInformationDto(int userId)
+        {
+            var currentNanny =
+                _unitOfWork.GetRepository<Nanny>()
+                .GetPagedList(include: x =>
+                    x.Include(x => x.Person)
+                    .Include(x => x.ServicesNanny))
+                .Items
+                .Where(x => x.Person.UserId == userId)
+                .First();
+
+            var lastServiceFromNanny = 
+                _unitOfWork.GetRepository<Service>()
+                .GetPagedList(include:x =>
+                    x.Include(x => x.PersonService))
+                .Items
+                .Where(x => x.NannyId == currentNanny.Id)
+                .Select(x => new ServiceNannyCardDto { ClientName = x.PersonService.Fullname, ServiceId = x.Id, HiringDate = x.HiringDate, ServicePrice = x.Price })
+                .LastOrDefault();
+
+            var serviceList = _unitOfWork.GetRepository<Service>().GetPagedList().Items.Where(x => x.NannyId == currentNanny.Id);
+
+            DateTime lastSixMonthsBefore = DateTime.Now.AddMonths(-5);
+            List<CountingChartDto> countingChartData = new List<CountingChartDto>();
+            List<string> monthNames = new List<string>();
+            List<EarnCountingChartDto> earnChartData = new List<EarnCountingChartDto>();
+
+            while (lastSixMonthsBefore <= DateTime.Now)
+            {
+
+                string monthName = CultureInfo.CurrentCulture.DateTimeFormat.GetAbbreviatedMonthName(lastSixMonthsBefore.Month).ToUpper();
+                var countingService = serviceList.Where(x => x.HiringDate.Month == lastSixMonthsBefore.Month).Count();
+                monthNames.Add(monthName);
+                countingChartData.Add(new CountingChartDto(countingService));
+                earnChartData.Add(new EarnCountingChartDto(currentNanny.ServicePrice * countingService));
+                lastSixMonthsBefore = lastSixMonthsBefore.AddMonths(1);
+            }
+
+            var returnData = new NannyDashboardInformationDto {
+                LastService = lastServiceFromNanny,
+                CountingServiceChart = countingChartData,
+                EarnCountingChart = earnChartData,
+                MonthNames = monthNames
+            };
+
+            return returnData;
         }
     }
 }
