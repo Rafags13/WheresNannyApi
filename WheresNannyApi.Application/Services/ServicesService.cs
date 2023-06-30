@@ -57,5 +57,34 @@ namespace WheresNannyApi.Application.Services
 
             return allServicesFromUser;
         }
+
+        public NannyServiceInformationDto GetNannyServiceInformation(int serviceId)
+        {
+            var serviceInformation =
+                _unitOfWork.GetRepository<Service>()
+                .GetPagedList(include: x =>
+                    x.Include(x => x.NannyService)
+                    .ThenInclude(x => x.Person)
+                    .Include(x => x.NannyService)
+                        .ThenInclude(x => x.CommentsRankNanny)
+                    .Include(x => x.PersonService)
+                        .ThenInclude(x => x.Address))
+                .Items
+                
+                .Where(x => x.Id == serviceId)
+                .Select(x => new NannyServiceInformationDto {
+                    ParentName = x.PersonService.Fullname,
+                    NannyName = x.NannyService.Person.Fullname,
+                    Cep = x.PersonService.Address.Cep,
+                    HiringDate = x.HiringDate,
+                    NannyCountStars = x.NannyService.RankAvegerageStars,
+                    NannyId = x.NannyService.Id,
+                    ServicePrice = x.Price
+                })
+                .First();
+
+            return serviceInformation;
+        }
+
     }
 }
