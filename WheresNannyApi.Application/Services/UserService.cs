@@ -9,6 +9,7 @@ using System.Text.Json;
 using System.Threading.Tasks;
 using TanvirArjel.EFCore.GenericRepository;
 using WheresNannyApi.Application.Interfaces;
+using WheresNannyApi.Application.Util;
 using WheresNannyApi.Domain.Entities;
 using WheresNannyApi.Domain.Entities.Dto;
 
@@ -33,7 +34,9 @@ namespace WheresNannyApi.Application.Services
 
             if (userExists) return "O usuário informado já está cadastrado no sistema.";
 
-            var user = new User(userRegisterDto.Username, userRegisterDto.Password);
+            var passwordEncrypted = Functions.Sha1Encrypt(userRegisterDto.Password);
+
+            var user = new User(userRegisterDto.Username, passwordEncrypted);
             await _repository.AddAsync(user);
             await _repository.SaveChangesAsync();
 

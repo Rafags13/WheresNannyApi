@@ -8,10 +8,12 @@ using System.Collections.Generic;
 using System.IdentityModel.Tokens.Jwt;
 using System.Linq;
 using System.Security.Claims;
+using System.Security.Cryptography;
 using System.Text;
 using System.Threading.Tasks;
 using TanvirArjel.EFCore.GenericRepository;
 using WheresNannyApi.Application.Interfaces;
+using WheresNannyApi.Application.Util;
 using WheresNannyApi.Domain.Entities;
 using WheresNannyApi.Domain.Entities.Dto;
 
@@ -31,7 +33,8 @@ namespace WheresNannyApi.Application.Services
         #region Login User
         public async Task<string> Login(UserLoginDto user)
         {
-            var userFounded = await _repository.GetAsync<User>(x => x.Username == user.Username && x.Password == user.Password);
+            var passwordEncrypted = Functions.Sha1Encrypt(user.Password);
+            var userFounded = await _repository.GetAsync<User>(x => x.Username == user.Username && x.Password == passwordEncrypted);
 
             if (userFounded == null) return null;
 
