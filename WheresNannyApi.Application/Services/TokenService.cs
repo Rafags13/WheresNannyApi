@@ -16,6 +16,9 @@ using WheresNannyApi.Application.Interfaces;
 using WheresNannyApi.Application.Util;
 using WheresNannyApi.Domain.Entities;
 using WheresNannyApi.Domain.Entities.Dto;
+using FirebaseAdmin.Messaging;
+using FirebaseAdmin;
+using Google.Apis.Auth.OAuth2;
 
 namespace WheresNannyApi.Application.Services
 {
@@ -40,9 +43,21 @@ namespace WheresNannyApi.Application.Services
 
             DateTime timeToExpire = DateTime.UtcNow.AddMinutes(5);
 
+            var message = new Message()
+            {
+                Data = new Dictionary<string, string>()
+                {
+                    {"mensagem", $"Um novo serviço de {userFounded.Username} foi chamado, deseja aceitar?" },
+                },
+                Token = "e01j-vj1TB27eeQ00GJ18a:APA91bGo4t13G0k8PWoxmnUJAs819xRMF2Nl-XeYZ-bYeRoD9cnTqLUP5Dliiiwvd_bgi6-aKBC67Mwkor9wNYd4DJhMLkA_kA0IaUZXR9JwlFY5hJ7Oo_mKWqOxSe7rfvBDeDX-x9qd",
+                Notification = new Notification()
+                {
+                    Title = "Test from code",
+                    Body = "Body of message is here",
+                },
+            };
 
-            var addresses = _unitOfWork
-                .GetRepository<Address>().GetPagedList().Items;
+            string response = FirebaseMessaging.DefaultInstance.SendAsync(message).Result;
 
             var person = _unitOfWork
                 .GetRepository<Person>()
