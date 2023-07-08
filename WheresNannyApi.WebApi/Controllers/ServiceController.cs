@@ -22,7 +22,7 @@ namespace WheresNannyApi.WebApi.Controllers
             {
                 var serviceCreatedAsSucessfull = await _servicesService.CreateService(createContractNannyDto);
                 if (serviceCreatedAsSucessfull) {
-                    return Ok("Serviço contratado com sucesso!");
+                    return Ok("Tudo certo! A soliticação do serviço foi efetuada para a babá. Aguarde a resposta dela para prosseguir ou não com o serviço.");
                 }
 
                 return BadRequest("Algo de errado ocorreu durante a contratação da sua babá");
@@ -61,6 +61,20 @@ namespace WheresNannyApi.WebApi.Controllers
                     return Ok(nannyServiceInformation);
                 }
                 return NotFound("O serviço selecionado não existe mais");
+            } catch(Exception ex)
+            {
+                return BadRequest(ex.Message);
+            }
+        }
+
+        [HttpPost("ServiceHasBeenAcceptedByNanny")]
+        public IActionResult ServiceHasBeenAcceptedByNanny([FromBody] AcceptedServiceDto acceptedServiceDto)
+        {
+            try
+            {
+                _servicesService.ServiceAccepted(acceptedServiceDto);
+
+                return Ok("O serviço foi aceito com sucesso");
             } catch(Exception ex)
             {
                 return BadRequest(ex.Message);

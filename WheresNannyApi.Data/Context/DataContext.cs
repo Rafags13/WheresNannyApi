@@ -25,6 +25,10 @@ namespace WheresNannyApi.Data.Context
                     .HasColumnType("varchar(50)")
                     .IsRequired();
 
+                entity.Property(x => x.DeviceId)
+                    .HasColumnType("varchar(250)")
+                    .IsRequired(false);
+
                 entity.Property(x => x.Token)
                     .HasColumnType("varchar(max)")
                     .IsRequired(false);
@@ -134,6 +138,11 @@ namespace WheresNannyApi.Data.Context
 
                 entity.Property(x => x.Price)
                     .HasColumnType("decimal")
+                    .IsRequired();
+
+                entity.Property(x => x.ServiceAccepted)
+                    .HasColumnType("bit")
+                    .HasDefaultValue(false)
                     .IsRequired();
 
                 entity.HasOne(x => x.PersonService)

@@ -24,6 +24,7 @@ namespace WheresNannyApi.Domain.Entities
         public DateTime HiringDate { get; set; }
         public decimal Price{ get; set; }
         public int PersonId { get; set; }
+        public bool ServiceAccepted { get; set; }
         public Person? PersonService {get; set; }
         public int NannyId { get; set; }
         public Nanny? NannyService { get; set; }

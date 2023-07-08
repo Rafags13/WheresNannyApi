@@ -41,24 +41,6 @@ namespace WheresNannyApi.Application.Services
 
             if (userFounded == null) return null;
 
-            DateTime timeToExpire = DateTime.UtcNow.AddMinutes(5);
-
-            var message = new Message()
-            {
-                Data = new Dictionary<string, string>()
-                {
-                    {"mensagem", $"Um novo serviço de {userFounded.Username} foi chamado, deseja aceitar?" },
-                },
-                Token = "e01j-vj1TB27eeQ00GJ18a:APA91bGo4t13G0k8PWoxmnUJAs819xRMF2Nl-XeYZ-bYeRoD9cnTqLUP5Dliiiwvd_bgi6-aKBC67Mwkor9wNYd4DJhMLkA_kA0IaUZXR9JwlFY5hJ7Oo_mKWqOxSe7rfvBDeDX-x9qd",
-                Notification = new Notification()
-                {
-                    Title = "Test from code",
-                    Body = "Body of message is here",
-                },
-            };
-
-            string response = FirebaseMessaging.DefaultInstance.SendAsync(message).Result;
-
             var person = _unitOfWork
                 .GetRepository<Person>()
                 .GetPagedList(include: person => person.Include(x => x.Address).Include(x => x.User).Include(x => x.Nanny)).Items
@@ -67,11 +49,17 @@ namespace WheresNannyApi.Application.Services
 
             if (person == null) return null;
 
-            var jwtToken = GenerateTokenBasedInUser(person, timeToExpire);
+            DateTime timeToExpire = DateTime.UtcNow.AddMinutes(5);
+
+            GenerateTokenUserDto generateTokenUserDto = new GenerateTokenUserDto(person, timeToExpire, userFounded.DeviceId);
+
+            var jwtToken = GenerateTokenBasedInUser(generateTokenUserDto);
 
             userFounded.Token = jwtToken;
             userFounded.CreatedIn = DateTime.Now;
             userFounded.ExpiresIn = timeToExpire;
+
+            userFounded.DeviceId = user.DeviceId;
 
             _repository.Update(userFounded);
             await _repository.SaveChangesAsync();
@@ -79,7 +67,7 @@ namespace WheresNannyApi.Application.Services
             return jwtToken;
         }
 
-        public string GenerateTokenBasedInUser(Person person, DateTime timeToExpire)
+        public string GenerateTokenBasedInUser(GenerateTokenUserDto generateTokenUserDto)
         {
             var key = Encoding.ASCII.GetBytes(_configuration.GetValue<string>("JWt:Key"));
 
@@ -87,14 +75,15 @@ namespace WheresNannyApi.Application.Services
             {
                 Subject = new ClaimsIdentity(new[]
             {
-                new Claim("id", person.User.Id.ToString()),
-                new Claim("imageUri", person.ImageUri),
-                new Claim("username", person.User.Username),
-                new Claim(JwtRegisteredClaimNames.Email, person.Email),
-                new Claim("cep", person.Address.Cep),
-                new Claim("isNanny", person.Nanny is not null ? "true" : "false", ClaimValueTypes.Boolean)
+                new Claim("id", generateTokenUserDto.PersonFromToken.User.Id.ToString()),
+                new Claim("imageUri", generateTokenUserDto.PersonFromToken.ImageUri),
+                new Claim("username", generateTokenUserDto.PersonFromToken.User.Username),
+                new Claim(JwtRegisteredClaimNames.Email, generateTokenUserDto.PersonFromToken.Email),
+                new Claim("cep", generateTokenUserDto.PersonFromToken.Address.Cep),
+                new Claim("deviceId", generateTokenUserDto.DeviceId),
+                new Claim("isNanny", generateTokenUserDto.PersonFromToken.Nanny is not null ? "true" : "false", ClaimValueTypes.Boolean)
              }),
-                Expires = timeToExpire,
+                Expires = generateTokenUserDto.TimeToExpire,
                 SigningCredentials = new SigningCredentials
             (new SymmetricSecurityKey(key),
             SecurityAlgorithms.HmacSha512Signature)

@@ -12,5 +12,6 @@ namespace WheresNannyApi.Application.Interfaces
         public Task<bool> CreateService(CreateContractNannyDto createContractNannyDto);
         public List<RecentCardDto> ListAllServices(int userId, int pageIndex);
         public NannyServiceInformationDto GetNannyServiceInformation(int serviceId);
+        public void ServiceAccepted(AcceptedServiceDto acceptedServiceDto);
     }
 }

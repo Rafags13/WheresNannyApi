@@ -16,6 +16,7 @@ namespace WheresNannyApi.Domain.Entities
         public int Id { get; set; }
         public string Username { get; set; }
         public string Password { get; set; }
+        public string DeviceId { get; set; }
         public string? Token { get; set; }
         public DateTime? ExpiresIn { get; set; }
         public DateTime? CreatedIn { get; set; }

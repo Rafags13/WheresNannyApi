@@ -31,6 +31,7 @@ builder.Services.AddScoped<IPersonService, PersonService>();
 builder.Services.AddScoped<IServicesService, ServicesService>();
 builder.Services.AddScoped<IAddressService, AddressService>();
 builder.Services.AddScoped<INannyService, NannyService>();
+builder.Services.AddScoped<IFirebaseMessagerService, FirebaseMessagerService>();
 
 builder.Services.AddGenericRepository<DataContext>();
 builder.Services.AddUnitOfWork<DataContext>();
