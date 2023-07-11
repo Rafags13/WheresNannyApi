@@ -53,14 +53,16 @@ namespace WheresNannyApi.Application.Services
                     Cep = findCommonUserServicesDto.Cep
                 });
 
-            var mostRecentService = servicesReference.Count() > 0 ? servicesReference.OrderByDescending(x => x.HiringDate).First() : null;
-            var recentCardDto = new RecentCardDto
+            var mostRecentService = servicesReference.OrderByDescending(x => x.HiringDate).FirstOrDefault();
+            
+            var recentCardDto = mostRecentService is not null ?
+                new RecentCardDto
             {
                 PersonName = mostRecentService.NannyService.Person.Fullname,
                 ImageUri = mostRecentService.NannyService.Person.ImageUri,
                 ServiceId = mostRecentService.Id,
                 Date = mostRecentService.HiringDate
-            };
+            } : null;
 
             var data = new UserHomeInformationDto
             {

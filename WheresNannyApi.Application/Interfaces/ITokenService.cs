@@ -13,5 +13,6 @@ namespace WheresNannyApi.Application.Interfaces
     {
         Task<string> Login(UserLoginDto user);
         string GenerateTokenBasedInUser(GenerateTokenUserDto generateTokenUserDto);
+        bool Logout(int userId);
     }
 }

@@ -9,7 +9,7 @@ using WheresNannyApi.Application.Interfaces;
 
 namespace WheresNannyApi.WebApi.Controllers
 {
-    [Route("api/v1/[controller]")]
+    [Route("api/v1/")]
     [ApiController]
     public class AuthenticationController : ControllerBase
     {
@@ -20,7 +20,7 @@ namespace WheresNannyApi.WebApi.Controllers
             _tokenService = tokenService;
         }
 
-        [HttpPost]
+        [HttpPost("Login")]
         public async Task<IActionResult> Login([FromBody] UserLoginDto user)
         {
             try
@@ -31,6 +31,26 @@ namespace WheresNannyApi.WebApi.Controllers
 
                 return Ok(token);
             } catch (Exception ex)
+            {
+                return BadRequest(ex.Message);
+            }
+        }
+
+        [HttpPost("Logout")]
+        public IActionResult Logout([FromBody] int userId)
+        {
+            try
+            {
+                var successfulToLogout = _tokenService.Logout(userId);
+
+                if (!successfulToLogout)
+                {
+                    return BadRequest("Não foi possível atender à requisição. Tente Novamente.");
+                }
+
+                return Ok(successfulToLogout);
+
+            } catch(Exception ex)
             {
                 return BadRequest(ex.Message);
             }

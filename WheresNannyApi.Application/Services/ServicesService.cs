@@ -74,8 +74,6 @@ namespace WheresNannyApi.Application.Services
 
             string response = FirebaseMessaging.DefaultInstance.SendAsync(message).Result;
 
-
-
             return true;
         }
 
@@ -102,30 +100,31 @@ namespace WheresNannyApi.Application.Services
 
         public NannyServiceInformationDto GetNannyServiceInformation(int serviceId)
         {
-            var serviceInformation =
+            var currentService =
                 _unitOfWork.GetRepository<Service>()
-                .GetPagedList(include: x =>
-                    x.Include(x => x.NannyService)
-                    .ThenInclude(x => x.Person)
-                    .Include(x => x.NannyService)
-                        .ThenInclude(x => x.CommentsRankNanny)
-                    .Include(x => x.PersonService)
-                        .ThenInclude(x => x.Address))
-                .Items
+                .GetFirstOrDefault(
+                    predicate: x => x.Id == serviceId,
+                    include: x => 
+                        x.Include(x => x.NannyService)
+                            .ThenInclude(x => x.Person)
+                        .Include(x => x.NannyService)
+                            .ThenInclude(x => x.CommentsRankNanny)
+                        .Include(x => x.PersonService)
+                            .ThenInclude(x => x.Address)
+                    );
 
-                .Where(x => x.Id == serviceId)
-                .Select(x => new NannyServiceInformationDto
+            NannyServiceInformationDto serviceInformation = 
+                new()
                 {
-                    ParentName = x.PersonService.Fullname,
-                    NannyName = x.NannyService.Person.Fullname,
-                    Cep = x.PersonService.Address.Cep,
-                    HiringDate = x.HiringDate,
-                    NannyCountStars = x.NannyService.RankAvegerageStars,
-                    NannyId = x.NannyService.Id,
-                    ServicePrice = x.Price
-                })
-                .First();
-
+                    ParentName = currentService?.PersonService?.Fullname,
+                    NannyName = currentService?.NannyService.Person.Fullname,
+                    Cep = currentService?.PersonService.Address.Cep,
+                    HiringDate = currentService.HiringDate,
+                    NannyCountStars = currentService.NannyService.RankAvegerageStars,
+                    NannyId = currentService.NannyService.Id,
+                    ServicePrice = currentService.Price
+                };
+            
             return serviceInformation;
         }
 

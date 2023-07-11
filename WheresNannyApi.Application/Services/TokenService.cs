@@ -51,7 +51,7 @@ namespace WheresNannyApi.Application.Services
 
             DateTime timeToExpire = DateTime.UtcNow.AddMinutes(5);
 
-            GenerateTokenUserDto generateTokenUserDto = new GenerateTokenUserDto(person, timeToExpire, userFounded.DeviceId);
+            GenerateTokenUserDto generateTokenUserDto = new GenerateTokenUserDto(person, timeToExpire, user.DeviceId);
 
             var jwtToken = GenerateTokenBasedInUser(generateTokenUserDto);
 
@@ -95,6 +95,26 @@ namespace WheresNannyApi.Application.Services
 
             return stringToken;
         }
-#endregion
+
+        #endregion
+
+        #region Logout
+        public bool Logout(int userId)
+        {
+            var currentUser = _unitOfWork.GetRepository<User>().GetFirstOrDefault(predicate: x => x.Id == userId);
+
+            if (currentUser is null) return false;
+
+            currentUser.Token = "";
+            currentUser.CreatedIn = null;
+            currentUser.ExpiresIn = null;
+            currentUser.DeviceId = "";
+
+            _unitOfWork.GetRepository<User>().Update(currentUser);
+            _unitOfWork.SaveChanges();
+
+            return true;
+        }
+        #endregion
     }
 }
