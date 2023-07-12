@@ -47,11 +47,13 @@ namespace WheresNannyApi.Application.Services
                 .Where(x => x.UserId == userFounded.Id)
                 .FirstOrDefault();
 
+            TypeOfUser typeOfUser = person.Nanny is not null ? TypeOfUser.Nanny : TypeOfUser.CommonUser;
+
             if (person == null) return null;
 
             DateTime timeToExpire = DateTime.UtcNow.AddMinutes(5);
 
-            GenerateTokenUserDto generateTokenUserDto = new GenerateTokenUserDto(person, timeToExpire, user.DeviceId);
+            GenerateTokenUserDto generateTokenUserDto = new GenerateTokenUserDto(person, timeToExpire, user.DeviceId, typeOfUser);
 
             var jwtToken = GenerateTokenBasedInUser(generateTokenUserDto);
 
@@ -81,7 +83,7 @@ namespace WheresNannyApi.Application.Services
                 new Claim(JwtRegisteredClaimNames.Email, generateTokenUserDto.PersonFromToken.Email),
                 new Claim("cep", generateTokenUserDto.PersonFromToken.Address.Cep),
                 new Claim("deviceId", generateTokenUserDto.DeviceId),
-                new Claim("isNanny", generateTokenUserDto.PersonFromToken.Nanny is not null ? "true" : "false", ClaimValueTypes.Boolean)
+                new Claim("typeOfUser", ((int) generateTokenUserDto.Type).ToString(), ClaimValueTypes.Integer)
              }),
                 Expires = generateTokenUserDto.TimeToExpire,
                 SigningCredentials = new SigningCredentials
