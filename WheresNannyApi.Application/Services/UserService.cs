@@ -183,14 +183,16 @@ namespace WheresNannyApi.Application.Services
         #region UpdatePassword
         public async Task<string> UpdatePassword(UpdatePasswordDto updatePasswordDto)
         {
-            var personReference = _unitOfWork.GetRepository<User>().GetPagedList().Items.Where(x => x.Id == updatePasswordDto.UserId).FirstOrDefault();
+            var personReference = _unitOfWork.GetRepository<User>().GetFirstOrDefault(predicate: x => x.Id == updatePasswordDto.UserId);
 
             if (personReference == null) return "Pessoa informada não foi encontrada no sistema. Tente Novamente";
+            var currentPasswordEncrypted = Functions.Sha1Encrypt(updatePasswordDto.OldPassword);
 
-            var passwords = new { OldPassword = personReference.Password, Password = updatePasswordDto.OldPassword};
+            var passwords = new { OldPassword = personReference.Password, Password = currentPasswordEncrypted };
             if (PasswordsDontMatch(passwords)) return "A senha informada não confere com a antiga. Por favor, tente novamente.";
 
-            personReference.Password = updatePasswordDto.NewPassword;
+            var newPasswordEncrypted = Functions.Sha1Encrypt(updatePasswordDto.NewPassword);
+            personReference.Password = newPasswordEncrypted;
             _repository.Update(personReference);
             await _repository.SaveChangesAsync();
             

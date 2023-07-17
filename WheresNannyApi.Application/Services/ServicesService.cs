@@ -35,19 +35,18 @@ namespace WheresNannyApi.Application.Services
                 createContractNannyDto.NannyId
                 );
 
-            var mobileNannyDeviceId =
-                _unitOfWork.GetRepository<User>()
-                .GetPagedList(
+            var mobileNannyDeviceId = 
+                _unitOfWork.GetRepository<User>().GetFirstOrDefault(
                     include: x =>
                         x.Include(x => x.Person)
-                            .ThenInclude(x => x.Nanny))
-                .Items
-                .Where(x => x.Person?.Nanny?.Id == createContractNannyDto.NannyId)
-                .Select(x => x.DeviceId)
-                .FirstOrDefault();
+                            .ThenInclude(x => x.Nanny),
+                   predicate: x => x.Person.Nanny.Id == createContractNannyDto.NannyId)
+                .DeviceId;
 
-            var nameFromPersonWhoHire = _unitOfWork.GetRepository<Person>().GetPagedList().Items.Where(x => x.Id == createContractNannyDto.PersonId).Select(x => x.Fullname).FirstOrDefault();
+            if (string.IsNullOrWhiteSpace(mobileNannyDeviceId)) throw new Exception("A babá não está disponível no momento, tente novamente.");
 
+            var nameFromPersonWhoHire = _unitOfWork.GetRepository<Person>().GetFirstOrDefault(predicate: x => x.Id == createContractNannyDto.PersonId).Fullname;
+           
             await _repository.AddAsync(newService);
             await _repository.SaveChangesAsync();
 
