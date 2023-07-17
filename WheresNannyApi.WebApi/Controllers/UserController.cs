@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
 using TanvirArjel.EFCore.GenericRepository;
 using WheresNannyApi.Application.Interfaces;
 using WheresNannyApi.Domain.Entities.Dto;
@@ -17,6 +18,7 @@ namespace WheresNannyApi.WebApi.Controllers
         }
 
         [HttpPost("RegisterUser")]
+        [Authorize]
         public async Task<IActionResult> RegisterUser([FromBody] UserRegisterDto userRegisterDto)
         {
             try
@@ -37,6 +39,7 @@ namespace WheresNannyApi.WebApi.Controllers
         }
 
         [HttpPost("RegisterNanny")]
+        [Authorize]
         public async Task<IActionResult> RegisterNanny([FromBody] NannyRegisterDto nannyRegisterDto)
         {
             try
@@ -56,6 +59,7 @@ namespace WheresNannyApi.WebApi.Controllers
         }
 
         [HttpPut("UpdatePassword")]
+        [Authorize]
         public async Task<IActionResult> UpdatePassword([FromBody] UpdatePasswordDto updatePasswordDto)
         {
             try

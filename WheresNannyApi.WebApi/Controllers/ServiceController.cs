@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
 using WheresNannyApi.Application.Interfaces;
 using WheresNannyApi.Domain.Entities.Dto;
 
@@ -16,6 +17,7 @@ namespace WheresNannyApi.WebApi.Controllers
         }
 
         [HttpPost("Create")]
+        [Authorize]
         public async Task<IActionResult> CreateService(CreateContractNannyDto createContractNannyDto)
         {
             try
@@ -34,6 +36,7 @@ namespace WheresNannyApi.WebApi.Controllers
         }
 
         [HttpGet("GetAll/{userId}/{pageIndex}")]
+        [Authorize]
         public IActionResult GetServiceById([FromRoute] int userId, int pageIndex)
         {
             try
@@ -53,6 +56,7 @@ namespace WheresNannyApi.WebApi.Controllers
         }
 
         [HttpGet("GetNannyServiceInformation/{serviceId}")]
+        [Authorize]
         public IActionResult GetNannyServiceInformation([FromRoute] int serviceId)
         {
             try
@@ -70,6 +74,7 @@ namespace WheresNannyApi.WebApi.Controllers
         }
 
         [HttpPost("ServiceHasBeenAcceptedByNanny")]
+        [Authorize]
         public IActionResult ServiceHasBeenAcceptedByNanny([FromBody] AcceptedServiceDto acceptedServiceDto)
         {
             try

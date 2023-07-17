@@ -51,7 +51,7 @@ namespace WheresNannyApi.Application.Services
 
             if (person == null) return null;
 
-            DateTime timeToExpire = DateTime.UtcNow.AddMinutes(5);
+            DateTime timeToExpire = DateTime.UtcNow.AddMinutes(5); // Add session time in future
 
             GenerateTokenUserDto generateTokenUserDto = new GenerateTokenUserDto(person, timeToExpire, user.DeviceId, typeOfUser);
 
@@ -72,6 +72,8 @@ namespace WheresNannyApi.Application.Services
         public string GenerateTokenBasedInUser(GenerateTokenUserDto generateTokenUserDto)
         {
             var key = Encoding.ASCII.GetBytes(_configuration.GetValue<string>("JWt:Key"));
+            var issue = _configuration.GetValue<string>("JWt:Issuer");
+            var audience = _configuration.GetValue<string>("JWt:Audience");
 
             var tokenDescriptor = new SecurityTokenDescriptor
             {
@@ -82,10 +84,11 @@ namespace WheresNannyApi.Application.Services
                 new Claim("username", generateTokenUserDto.PersonFromToken.User.Username),
                 new Claim(JwtRegisteredClaimNames.Email, generateTokenUserDto.PersonFromToken.Email),
                 new Claim("cep", generateTokenUserDto.PersonFromToken.Address.Cep),
+                new Claim(JwtRegisteredClaimNames.Aud, audience),
+                new Claim(JwtRegisteredClaimNames.Iss, issue),
                 new Claim("deviceId", generateTokenUserDto.DeviceId),
                 new Claim("typeOfUser", ((int) generateTokenUserDto.Type).ToString(), ClaimValueTypes.Integer)
              }),
-                Expires = generateTokenUserDto.TimeToExpire,
                 SigningCredentials = new SigningCredentials
             (new SymmetricSecurityKey(key),
             SecurityAlgorithms.HmacSha512Signature)

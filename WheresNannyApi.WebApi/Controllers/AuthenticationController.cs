@@ -37,6 +37,7 @@ namespace WheresNannyApi.WebApi.Controllers
         }
 
         [HttpPost("Logout")]
+        [Authorize]
         public IActionResult Logout([FromBody] int userId)
         {
             try

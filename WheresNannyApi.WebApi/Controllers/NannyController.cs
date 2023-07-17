@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
 using WheresNannyApi.Application.Interfaces;
 using WheresNannyApi.Domain.Entities.Dto;
 
@@ -15,6 +16,7 @@ namespace WheresNannyApi.WebApi.Controllers
         }
 
         [HttpGet("GetAllServices/{userId}/{pageIndex}")]
+        [Authorize]
         public async Task<IActionResult> GetAllServices([FromRoute] int userId, int pageIndex)
         {
             try
@@ -31,6 +33,7 @@ namespace WheresNannyApi.WebApi.Controllers
         }
 
         [HttpGet("GetDashboardInformation/{userId}")]
+        [Authorize]
         public IActionResult GetNannyDashboardInformationDto(int userId)
         {
             try

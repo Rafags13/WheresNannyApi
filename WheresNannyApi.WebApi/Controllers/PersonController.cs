@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
 using TanvirArjel.EFCore.GenericRepository;
 using WheresNannyApi.Application.Interfaces;
 using WheresNannyApi.Domain.Entities.Dto;
@@ -16,6 +17,7 @@ namespace WheresNannyApi.WebApi.Controllers
         }
 
         [HttpPost("GetUserHomeInformation")]
+        [Authorize]
         public async Task<IActionResult> GetUserMainPageInformation(FindCommonUserServicesDto findCommonUserServicesDto)
         {
             try
@@ -35,6 +37,7 @@ namespace WheresNannyApi.WebApi.Controllers
         }
 
         [HttpPost("ChangeNannyListByFilter")]
+        [Authorize]
         public IActionResult ChangeNannyListByFilter(ChangeNannyListByFilterDto changeNannyListByFilterDto)
         {
             try
@@ -55,6 +58,7 @@ namespace WheresNannyApi.WebApi.Controllers
         }
 
         [HttpGet("GetNannyById/{id}/{userId}")]
+        [Authorize]
         public IActionResult GetNannyInfoToContractById([FromRoute] int id, int userId)
         {
             try
@@ -76,6 +80,7 @@ namespace WheresNannyApi.WebApi.Controllers
         }
 
         [HttpGet("GetProfileInformation/{userId}")]
+        [Authorize]
         public IActionResult ProfileListInformation([FromRoute] int userId)
         {
             try
@@ -96,6 +101,7 @@ namespace WheresNannyApi.WebApi.Controllers
         }
 
         [HttpPut("UpdatePersonData")]
+        [Authorize]
         public async Task<IActionResult> UpdateProfile([FromBody] UpdateProfileInformationDto updateProfileInformationDto) 
         {
             try
