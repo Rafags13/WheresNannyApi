@@ -16,16 +16,14 @@ namespace WheresNannyApi.Application.Services
 {
     public class AddressService : IAddressService
     {
-        private readonly IUnitOfWork _unitOfWork;
         private readonly IRepository _repository;
         private readonly IHttpClientFactory _httpClientFactory;
-        public AddressService(IUnitOfWork unitOfWork, IRepository repository, IHttpClientFactory httpClientFactory) 
+        public AddressService(IRepository repository, IHttpClientFactory httpClientFactory) 
         {
-            _unitOfWork = unitOfWork;
             _repository = repository;
             _httpClientFactory = httpClientFactory;
         }
-        public async void CreateAddress(CreateAddressDto address)
+        public async Task<bool> CreateAddress(CreateAddressDto address)
         {
             var addressExists = await AddressExists(address.Cep);
 
@@ -57,6 +55,7 @@ namespace WheresNannyApi.Application.Services
                     throw new Exception("Não foi possível encontrar o cep informado");
                 }
             }
+            return true;
 
         }
 

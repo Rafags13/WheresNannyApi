@@ -1,12 +1,5 @@
 ﻿using Arch.EntityFrameworkCore.UnitOfWork;
-using Microsoft.AspNetCore.Mvc;
 using Microsoft.Net.Http.Headers;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Text.Json;
-using System.Threading.Tasks;
 using TanvirArjel.EFCore.GenericRepository;
 using WheresNannyApi.Application.Interfaces;
 using WheresNannyApi.Application.Util;
@@ -15,16 +8,18 @@ using WheresNannyApi.Domain.Entities.Dto;
 
 namespace WheresNannyApi.Application.Services
 {
-    public class UserService: IUserService
+    public class UserService : IUserService
     {
         private readonly IRepository _repository;
         private readonly IHttpClientFactory _httpClientFactory;
         private readonly IUnitOfWork _unitOfWork;
-        public UserService(IRepository repository, IHttpClientFactory httpClientFactory, IUnitOfWork unitOfWork) 
+        private readonly IAddressService _addressService;
+        public UserService(IRepository repository, IHttpClientFactory httpClientFactory, IUnitOfWork unitOfWork, IAddressService addressService)
         {
             _repository = repository;
             _httpClientFactory = httpClientFactory;
             _unitOfWork = unitOfWork;
+            _addressService = addressService;
         }
         #region Register User
 
@@ -40,40 +35,19 @@ namespace WheresNannyApi.Application.Services
             await _repository.AddAsync(user);
             await _repository.SaveChangesAsync();
 
-            var addressExists = await AddressExists(userRegisterDto.Cep);
-            if (!addressExists)
-            {
-                var httpRequestNannyUserCep = CreateRequestMessageForSpecificCep(userRegisterDto.Cep);
-                var httpClient = _httpClientFactory.CreateClient();
-
-                var requestNannyUser = await httpClient.SendAsync(httpRequestNannyUserCep);
-
-                if (requestNannyUser.IsSuccessStatusCode)
+            var sucessfulCreateAddress = await _addressService.CreateAddress(
+                new CreateAddressDto()
                 {
-                    var contentStreamNanny = await requestNannyUser.Content.ReadAsStreamAsync();
+                    Cep = userRegisterDto.Cep,
+                    Number = userRegisterDto.HouseNumber,
+                    Complement = userRegisterDto.Complement
+                });
 
-                    var deserializeNanny = await JsonSerializer.DeserializeAsync<CepRequestDto>(contentStreamNanny) ?? new CepRequestDto();
-                    var address = new Address(
-                        userRegisterDto.Cep,
-                        userRegisterDto.HouseNumber is null ? "" : userRegisterDto.HouseNumber,
-                        userRegisterDto.Complement is null ? "" : userRegisterDto.Complement,
-                        float.Parse(deserializeNanny.latitude),
-                        float.Parse(deserializeNanny.longitude)
-                    );
-                    await _repository.AddAsync(address);
-                    await _repository.SaveChangesAsync();
-
-                    var nannyCepRequest = deserializeNanny;
-                }
-                else
-                {
-                    throw new Exception("Não foi possível encontrar o cep informado");
-                }
-            }
+            if (!sucessfulCreateAddress) return "Não foi possível criar o endereço informado.";
 
             var currentUser = await _repository.GetAsync<User>(x => x.Username == userRegisterDto.Username);
             var currentAddress = await _repository.GetAsync<Address>(x => x.Cep == userRegisterDto.Cep);
-            var person = 
+            var person =
                 new Person(
                         userRegisterDto.Fullname,
                         userRegisterDto.Email,
@@ -136,7 +110,7 @@ namespace WheresNannyApi.Application.Services
 
             var currentPerson = await _repository.GetAsync<Person>(x => x.Email == nannyRegisterDto.UserDataToRegister.Email);
 
-            if( currentPerson is null ) { return "Algo ocorreu de errado durante o seu registro. Por favor, contate um administrador do sistema."; }
+            if (currentPerson is null) { return "Algo ocorreu de errado durante o seu registro. Por favor, contate um administrador do sistema."; }
 
             var newNanny = new Nanny(nannyRegisterDto.ServicePrice, currentPerson.Id);
 
@@ -195,7 +169,7 @@ namespace WheresNannyApi.Application.Services
             personReference.Password = newPasswordEncrypted;
             _repository.Update(personReference);
             await _repository.SaveChangesAsync();
-            
+
             return "";
         }
 

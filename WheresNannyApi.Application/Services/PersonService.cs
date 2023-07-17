@@ -1,18 +1,6 @@
 ﻿using Arch.EntityFrameworkCore.UnitOfWork;
 using GeoCoordinatePortable;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.Net.Http.Headers;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Linq.Dynamic.Core;
-using System.Net;
-using System.Net.Http;
-using System.Net.Http.Json;
-using System.Net.NetworkInformation;
-using System.Text;
-using System.Text.Json;
-using System.Threading.Tasks;
 using TanvirArjel.EFCore.GenericRepository;
 using WheresNannyApi.Application.Interfaces;
 using WheresNannyApi.Domain.Entities;
@@ -231,7 +219,7 @@ namespace WheresNannyApi.Application.Services
 
             if (newAddressDontExistsYet)
             {
-                _addressService.CreateAddress(
+                _ = _addressService.CreateAddress(
                     new CreateAddressDto
                     {
                         Cep = updateProfileInformationDto.AddressFromUpdateInformation.Cep,

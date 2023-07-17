@@ -18,7 +18,6 @@ namespace WheresNannyApi.WebApi.Controllers
         }
 
         [HttpPost("RegisterUser")]
-        [Authorize]
         public async Task<IActionResult> RegisterUser([FromBody] UserRegisterDto userRegisterDto)
         {
             try
@@ -39,7 +38,6 @@ namespace WheresNannyApi.WebApi.Controllers
         }
 
         [HttpPost("RegisterNanny")]
-        [Authorize]
         public async Task<IActionResult> RegisterNanny([FromBody] NannyRegisterDto nannyRegisterDto)
         {
             try
