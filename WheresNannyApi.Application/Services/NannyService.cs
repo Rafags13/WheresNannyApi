@@ -25,6 +25,7 @@ namespace WheresNannyApi.Application.Services
             _repository = repository;
         }
 
+        #region Get All Services
         public async Task<List<ServiceNannyCardDto>> GetAllNannyServices(int userId, int pageIndex)
         {
             var currentNannyId = _unitOfWork.GetRepository<Nanny>().GetFirstOrDefault(include: x =>
@@ -51,7 +52,9 @@ namespace WheresNannyApi.Application.Services
 
             return currentServicesFromNanny;
         }
+        #endregion
 
+        #region Nanny Dashboard Information
         public NannyDashboardInformationDto GetNannyDashboardInformationDto(int userId)
         {
 
@@ -94,5 +97,6 @@ namespace WheresNannyApi.Application.Services
 
             return returnData;
         }
+        #endregion
     }
 }

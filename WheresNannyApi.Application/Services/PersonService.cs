@@ -21,6 +21,7 @@ namespace WheresNannyApi.Application.Services
             _httpClientFactory = httpClientFactory;
             _addressService = addressService;
         }
+
         #region Common User Home Information
 
         public async Task<UserHomeInformationDto> GetUserMainPageInformation(FindCommonUserServicesDto findCommonUserServicesDto)
@@ -132,6 +133,8 @@ namespace WheresNannyApi.Application.Services
         }
         #endregion
 
+        #region Nanny Contract Information
+
         public NannyContractDto GetNannyInfoToContractById(int id, int userId)
         {
             var currentPerson = _unitOfWork.GetRepository<Person>().GetFirstOrDefault(include: x => x.Include(x => x.Address), predicate: x => x.UserId == userId);
@@ -159,7 +162,9 @@ namespace WheresNannyApi.Application.Services
 
             return nannyContractInformation;
         }
+        #endregion
 
+        #region Display Profile Information
         public UpdateProfileInformationDto? ProfileListInformation(int userId)
         {
             var currentPerson = _unitOfWork.GetRepository<Person>().GetFirstOrDefault(include: x => x.Include(x => x.Address), predicate: x => x.UserId == userId);
@@ -184,6 +189,9 @@ namespace WheresNannyApi.Application.Services
 
             return updateProfileDto;
         }
+        #endregion
+
+        #region Update Profile Information
         public async Task<string> UpdateProfileInformation(UpdateProfileInformationDto updateProfileInformationDto)
         {
             var errorMessage = ReturnMessageIfUserCantBeUpdated(updateProfileInformationDto);
@@ -241,5 +249,6 @@ namespace WheresNannyApi.Application.Services
 
             return "";
         }
+        #endregion
     }
 }

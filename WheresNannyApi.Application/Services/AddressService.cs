@@ -23,6 +23,8 @@ namespace WheresNannyApi.Application.Services
             _repository = repository;
             _httpClientFactory = httpClientFactory;
         }
+
+        #region Create
         public async Task<bool> CreateAddress(CreateAddressDto address)
         {
             var addressExists = await AddressExists(address.Cep);
@@ -80,5 +82,6 @@ namespace WheresNannyApi.Application.Services
 
             return address != null;
         }
+        #endregion
     }
 }

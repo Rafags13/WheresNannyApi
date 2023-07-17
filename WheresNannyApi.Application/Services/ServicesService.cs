@@ -25,6 +25,8 @@ namespace WheresNannyApi.Application.Services
             _unitOfWork = unitOfWork;
             _firebaseMessagerService = firebaseMessagerService;
         }
+
+        #region Create
         public async Task<bool> CreateService(CreateContractNannyDto createContractNannyDto)
         {
             var newService = new Service(
@@ -75,7 +77,9 @@ namespace WheresNannyApi.Application.Services
 
             return true;
         }
+        #endregion
 
+        #region List All Services
         public List<RecentCardDto> ListAllServices(int userId, int pageIndex)
         {
             var allServicesFromUser =
@@ -96,7 +100,9 @@ namespace WheresNannyApi.Application.Services
 
             return allServicesFromUser;
         }
+        #endregion
 
+        #region Nanny Service Information
         public NannyServiceInformationDto GetNannyServiceInformation(int serviceId)
         {
             var currentService =
@@ -126,7 +132,9 @@ namespace WheresNannyApi.Application.Services
             
             return serviceInformation;
         }
+        #endregion
 
+        #region Accept Service
         public void ServiceAccepted(AcceptedServiceDto acceptedServiceDto)
         {
             var currentService = 
@@ -164,5 +172,6 @@ namespace WheresNannyApi.Application.Services
 
             _firebaseMessagerService.SendNotification(message);
         }
+        #endregion
     }
 }

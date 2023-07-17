@@ -10,10 +10,12 @@ namespace WheresNannyApi.Application.Services
 {
     public class FirebaseMessagerService : IFirebaseMessagerService
     {
+        #region Send
         public string SendNotification(Message message)
         {
             var response = FirebaseMessaging.DefaultInstance.SendAsync(message).Result;
             return response;
         }
+        #endregion
     }
 }
