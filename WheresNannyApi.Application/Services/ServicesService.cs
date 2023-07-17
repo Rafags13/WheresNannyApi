@@ -129,12 +129,20 @@ namespace WheresNannyApi.Application.Services
 
         public void ServiceAccepted(AcceptedServiceDto acceptedServiceDto)
         {
-            var service = _unitOfWork.GetRepository<Service>().GetPagedList(include: x => x.Include(x => x.NannyService).ThenInclude(x => x.Person).Include(x => x.PersonService).ThenInclude(x => x.User)).Items.Where(x => x.Id == acceptedServiceDto.ServiceId).FirstOrDefault();
+            var currentService = 
+                _unitOfWork.GetRepository<Service>()
+                .GetFirstOrDefault(
+                    include: x => 
+                        x.Include(x => x.NannyService)
+                            .ThenInclude(x => x.Person)
+                        .Include(x => x.PersonService)
+                            .ThenInclude(x => x.User),
+                    predicate: x => x.Id == acceptedServiceDto.ServiceId);
 
-            if(service != null)
+            if(currentService != null)
             {
-                service.ServiceAccepted = acceptedServiceDto.Accepted;
-                _unitOfWork.GetRepository<Service>().Update(service);
+                currentService.ServiceAccepted = acceptedServiceDto.Accepted;
+                _unitOfWork.GetRepository<Service>().Update(currentService);
                 _unitOfWork.SaveChanges();
             }
 
@@ -143,14 +151,14 @@ namespace WheresNannyApi.Application.Services
             {
                 Data = new Dictionary<string, string>()
                 {
-                    {"message", $"O serviço da babá {service?.PersonService?.Fullname} {acceptedServiceMessage}" },
+                    {"message", $"O serviço da babá {currentService?.PersonService?.Fullname} {acceptedServiceMessage}" },
                     {"accepted", acceptedServiceDto.Accepted ? "true" : "false" }
                 },
-                Token = service?.PersonService?.User?.DeviceId,
+                Token = currentService?.PersonService?.User?.DeviceId,
                 Notification = new Notification()
                 {
                     Title = "Novo serviço",
-                    Body = $"O serviço da babá {service?.PersonService?.Fullname} {acceptedServiceMessage}",
+                    Body = $"O serviço da babá {currentService?.PersonService?.Fullname} {acceptedServiceMessage}",
                 },
             };
 

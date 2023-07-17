@@ -4,6 +4,7 @@ using System;
 using System.Collections.Generic;
 using System.Globalization;
 using System.Linq;
+using System.Net.WebSockets;
 using System.Security.Cryptography.X509Certificates;
 using System.Text;
 using System.Threading.Tasks;
@@ -24,22 +25,11 @@ namespace WheresNannyApi.Application.Services
             _repository = repository;
         }
 
-        public Nanny GetNanny(int id)
-        {
-            var currentNanny = _unitOfWork.GetRepository<Nanny>().GetPagedList(include: x => x.Include(x => x.Person)).Items.Where(x => x.Person.UserId == id).FirstOrDefault();
-            return currentNanny ?? new Nanny();
-        }
-
         public async Task<List<ServiceNannyCardDto>> GetAllNannyServices(int userId, int pageIndex)
         {
-            var currentNannyId =
-                _unitOfWork.GetRepository<Nanny>()
-                .GetPagedList(include: x =>
+            var currentNannyId = _unitOfWork.GetRepository<Nanny>().GetFirstOrDefault(include: x =>
                     x.Include(x => x.Person)
-                    .Include(x => x.ServicesNanny))
-                .Items
-                .Where(x => x.Person.UserId == userId)
-                .First().Id;
+                    .Include(x => x.ServicesNanny), predicate: x => x.Person.UserId == userId).Id;
 
             var currentServicesFromNanny =
                 _unitOfWork.GetRepository<Service>()
@@ -64,16 +54,12 @@ namespace WheresNannyApi.Application.Services
 
         public NannyDashboardInformationDto GetNannyDashboardInformationDto(int userId)
         {
-            var currentNanny =
-                _unitOfWork.GetRepository<Nanny>()
-                .GetPagedList(include: x =>
-                    x.Include(x => x.Person)
-                    .Include(x => x.ServicesNanny))
-                .Items
-                .Where(x => x.Person.UserId == userId)
-                .First();
 
-            var lastServiceFromNanny = 
+            var currentNanny = _unitOfWork.GetRepository<Nanny>().GetFirstOrDefault(include: x =>
+                    x.Include(x => x.Person)
+                    .Include(x => x.ServicesNanny), predicate: x => x.Person.UserId == userId);
+
+            var lastServiceFromNanny =
                 _unitOfWork.GetRepository<Service>()
                 .GetPagedList(include:x =>
                     x.Include(x => x.PersonService))

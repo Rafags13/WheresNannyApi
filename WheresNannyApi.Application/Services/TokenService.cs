@@ -41,19 +41,22 @@ namespace WheresNannyApi.Application.Services
 
             if (userFounded == null) return null;
 
-            var person = _unitOfWork
-                .GetRepository<Person>()
-                .GetPagedList(include: person => person.Include(x => x.Address).Include(x => x.User).Include(x => x.Nanny)).Items
-                .Where(x => x.UserId == userFounded.Id)
-                .FirstOrDefault();
+            var currentPerson =
+                _unitOfWork.GetRepository<Person>()
+                .GetFirstOrDefault(
+                    include: person =>
+                    person.Include(x => x.Address)
+                    .Include(x => x.User)
+                    .Include(x => x.Nanny),
+                    predicate: x => x.UserId == userFounded.Id);
+  
+            TypeOfUser typeOfUser = currentPerson.Nanny is not null ? TypeOfUser.Nanny : TypeOfUser.CommonUser;
 
-            TypeOfUser typeOfUser = person.Nanny is not null ? TypeOfUser.Nanny : TypeOfUser.CommonUser;
-
-            if (person == null) return null;
+            if (currentPerson == null) return null;
 
             DateTime timeToExpire = DateTime.UtcNow.AddMinutes(5); // Add session time in future
 
-            GenerateTokenUserDto generateTokenUserDto = new GenerateTokenUserDto(person, timeToExpire, user.DeviceId, typeOfUser);
+            GenerateTokenUserDto generateTokenUserDto = new GenerateTokenUserDto(currentPerson, timeToExpire, user.DeviceId, typeOfUser);
 
             var jwtToken = GenerateTokenBasedInUser(generateTokenUserDto);
 

@@ -134,41 +134,27 @@ namespace WheresNannyApi.Application.Services
 
         public NannyContractDto GetNannyInfoToContractById(int id, int userId)
         {
-            var currentPerson =
-                _unitOfWork.GetRepository<Person>()
-                .GetPagedList(
-                    include: x =>
-                        x.Include(x => x.Address)
-                    )
-                .Items
-                .Where(x => x.UserId == userId)
-                .FirstOrDefault();
-            var nanny =
-                _unitOfWork.GetRepository<Nanny>()
-                .GetPagedList(
-                    include: x =>
+            var currentPerson = _unitOfWork.GetRepository<Person>().GetFirstOrDefault(include: x => x.Include(x => x.Address), predicate: x => x.UserId == userId);
+            var currentNanny = _unitOfWork.GetRepository<Nanny>().GetFirstOrDefault(include: x =>
                         x.Include(x => x.Person)
                         .Include(x => x.Person)
                             .ThenInclude(x => x.Address)
-                        .Include(x => x.CommentsRankNanny))
-                .Items
-                .Where(x => x.Id == id)
-                .FirstOrDefault();
+                        .Include(x => x.CommentsRankNanny), predicate: x => x.Id == id);
 
             GeoCoordinate currentPersonCoordinate = new GeoCoordinate(currentPerson.Address.Latitude ?? 0.0, currentPerson.Address.Longitude ?? 0.0);
-            GeoCoordinate nannyPersonCoordinate = new GeoCoordinate(nanny.Person.Address.Latitude ?? 0.0, nanny.Person.Address.Longitude ?? 0.0);
+            GeoCoordinate nannyPersonCoordinate = new GeoCoordinate(currentNanny.Person.Address.Latitude ?? 0.0, currentNanny.Person.Address.Longitude ?? 0.0);
 
             double distanceBetweenPersonAndNanny = currentPersonCoordinate.GetDistanceTo(nannyPersonCoordinate);
 
             var nannyContractInformation = new NannyContractDto
             {
-                NannyId = nanny.Id,
-                ImageProfileBase64Uri = nanny.Person.ImageUri,
-                RankAverageStars = nanny.RankAvegerageStars,
-                RankCommentCount = nanny.RankCommentCount,
-                ServicePrice = nanny.ServicePrice,
-                Address = new NannyAddressPersonContractDto { Cep = nanny.Person.Address.Cep, HouseNumber = nanny.Person.Address.HouseNumber, DistanceBetweenThePeople = Convert.ToInt32(distanceBetweenPersonAndNanny).ToString() },
-                Person = new NannyPersonContractDto { Cellphone = nanny.Person.Cellphone, Email = nanny.Person.Email, Name = nanny.Person.Fullname }
+                NannyId = currentNanny.Id,
+                ImageProfileBase64Uri = currentNanny.Person.ImageUri,
+                RankAverageStars = currentNanny.RankAvegerageStars,
+                RankCommentCount = currentNanny.RankCommentCount,
+                ServicePrice = currentNanny.ServicePrice,
+                Address = new NannyAddressPersonContractDto { Cep = currentNanny.Person.Address.Cep, HouseNumber = currentNanny.Person.Address.HouseNumber, DistanceBetweenThePeople = Convert.ToInt32(distanceBetweenPersonAndNanny).ToString() },
+                Person = new NannyPersonContractDto { Cellphone = currentNanny.Person.Cellphone, Email = currentNanny.Person.Email, Name = currentNanny.Person.Fullname }
             };
 
             return nannyContractInformation;
@@ -176,23 +162,23 @@ namespace WheresNannyApi.Application.Services
 
         public UpdateProfileInformationDto? ProfileListInformation(int userId)
         {
-            var person = _unitOfWork.GetRepository<Person>().GetPagedList(include: x => x.Include(x => x.Address)).Items.Where(x => x.UserId == userId).FirstOrDefault();
-            if (person == null) return null;
+            var currentPerson = _unitOfWork.GetRepository<Person>().GetFirstOrDefault(include: x => x.Include(x => x.Address), predicate: x => x.UserId == userId);
+            if (currentPerson == null) return null;
 
             var updateProfileDto = new UpdateProfileInformationDto
             {
                 AddressFromUpdateInformation = new AddressFromUpdateInformationDto
                 {
-                    Cep = person.Address.Cep,
-                    Complement = person.Address.Complement ?? "",
-                    Number = person.Address.HouseNumber ?? ""
+                    Cep = currentPerson.Address.Cep,
+                    Complement = currentPerson.Address.Complement ?? "",
+                    Number = currentPerson.Address.HouseNumber ?? ""
                 },
                 PersonInformation = new PersonInformationDto
                 {
-                    Cpf = person.Cpf,
-                    Fullname = person.Fullname,
-                    Cellphone = person.Cellphone,
-                    Email = person.Email,
+                    Cpf = currentPerson.Cpf,
+                    Fullname = currentPerson.Fullname,
+                    Cellphone = currentPerson.Cellphone,
+                    Email = currentPerson.Email,
                 }
             };
 
@@ -203,17 +189,18 @@ namespace WheresNannyApi.Application.Services
             var errorMessage = ReturnMessageIfUserCantBeUpdated(updateProfileInformationDto);
             if(errorMessage != "") return errorMessage;
 
-            var personContext = _unitOfWork.GetRepository<Person>().GetPagedList(include: x => x.Include(x => x.Address)).Items;
-
-            var currentUser = personContext.Where(X => X.UserId == updateProfileInformationDto.PersonInformation.Id).FirstOrDefault();
+            var currentUser = 
+                _unitOfWork.GetRepository<Person>()
+                .GetFirstOrDefault(
+                    include: x => x.Include(x => x.Address),
+                    predicate: x => x.UserId == updateProfileInformationDto.PersonInformation.Id);
 
             currentUser.Fullname = updateProfileInformationDto.PersonInformation.Fullname;
             currentUser.Cpf = updateProfileInformationDto.PersonInformation.Cpf;
             currentUser.Email = updateProfileInformationDto.PersonInformation.Email;
             currentUser.Cellphone = updateProfileInformationDto.PersonInformation.Cellphone;
 
-            var addressContext = _unitOfWork.GetRepository<Address>().GetPagedList().Items;
-            var currentAddress = addressContext.Where(x => x.Cep == updateProfileInformationDto.AddressFromUpdateInformation.Cep).FirstOrDefault();
+            var currentAddress = _unitOfWork.GetRepository<Address>().GetFirstOrDefault(predicate: x => x.Cep == updateProfileInformationDto.AddressFromUpdateInformation.Cep);
 
             var newAddressDontExistsYet = currentAddress == null;
 
@@ -227,7 +214,7 @@ namespace WheresNannyApi.Application.Services
                         Number = updateProfileInformationDto.AddressFromUpdateInformation.Number
                     });
 
-                var addressAfterAddedInSystem = addressContext.Where(x => x.Cep == updateProfileInformationDto.AddressFromUpdateInformation.Cep).FirstOrDefault();
+                var addressAfterAddedInSystem = _unitOfWork.GetRepository<Address>().GetFirstOrDefault(predicate: x => x.Cep == updateProfileInformationDto.AddressFromUpdateInformation.Cep);
 
                 currentUser.AddressId = addressAfterAddedInSystem.Id;
             }
@@ -244,12 +231,12 @@ namespace WheresNannyApi.Application.Services
 
         private string ReturnMessageIfUserCantBeUpdated(UpdateProfileInformationDto updateProfileInformationDto)
         {
-            var personContext = _unitOfWork.GetRepository<Person>().GetPagedList(include: x => x.Include(x => x.Address)).Items;
+            var personContext = _unitOfWork.GetRepository<Person>();
 
-            var cpfAlreadyExistsInSystem = personContext.Where(x => x.Cpf == updateProfileInformationDto.PersonInformation.Cpf && updateProfileInformationDto.PersonInformation.Id != x.UserId).FirstOrDefault();
+            var cpfAlreadyExistsInSystem = personContext.GetFirstOrDefault(predicate: x => x.Cpf == updateProfileInformationDto.PersonInformation.Cpf && updateProfileInformationDto.PersonInformation.Id != x.UserId);
             if (cpfAlreadyExistsInSystem != null) return "Já existe uma pessoa cadastrada com esse CPF no sistema. Tente Novamente.";
 
-            var emailAlreadyExistsInSystem = personContext.Where(x => x.Email == updateProfileInformationDto.PersonInformation.Email && updateProfileInformationDto.PersonInformation.Id != x.UserId).FirstOrDefault();
+            var emailAlreadyExistsInSystem = personContext.GetFirstOrDefault(predicate: x => x.Email == updateProfileInformationDto.PersonInformation.Email && updateProfileInformationDto.PersonInformation.Id != x.UserId);
             if (emailAlreadyExistsInSystem != null) return "Já existe uma pessoa cadastrada com esse E-mail no sistema. Tente Novamente.";
 
             return "";
