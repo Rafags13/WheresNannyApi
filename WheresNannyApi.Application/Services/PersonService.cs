@@ -91,7 +91,7 @@ namespace WheresNannyApi.Application.Services
                 _ => nannysReference.ToList()
             };
 
-            var listNannyCardObject = CreateModelNannyCardObject(nannysReferenceOrderedByFilter);
+            var listNannyCardObject = CreateModelNannyCardObject(nannysReferenceOrderedByFilter.Take(3).ToList());
 
             return listNannyCardObject;
         }
