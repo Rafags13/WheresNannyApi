@@ -19,27 +19,40 @@ namespace WheresNannyApi.WebApi.Controllers
         [HttpPost("RegisterUser")]
         public async Task<IActionResult> RegisterUser([FromBody] UserRegisterDto userRegisterDto)
         {
-            var errorMessage = await _userService.RegisterUser(userRegisterDto);
-
-            if(errorMessage == "")
+            try
             {
+                var errorMessage = await _userService.RegisterUser(userRegisterDto);
+
+                if (errorMessage != "")
+                {
+                    return Conflict(errorMessage);
+                }
+
                 return Ok("Usuário registrado com sucesso!");
             }
-
-            return Conflict(errorMessage);
+            catch (Exception ex)
+            {
+                return BadRequest(ex.Message);
+            }
         }
 
         [HttpPost("RegisterNanny")]
         public async Task<IActionResult> RegisterNanny([FromBody] NannyRegisterDto nannyRegisterDto)
         {
-            var errorMessage = await _userService.RegisterNanny(nannyRegisterDto);
-
-            if (errorMessage == "")
+            try
             {
-                return Ok("Você foi registrada no sistema. Aguarde enquanto fazemos uma análise interna e, assim que for aprovada, te enviaremos um email com os próximos passos");
-            }
+                var errorMessage = await _userService.RegisterNanny(nannyRegisterDto);
 
-            return Conflict(errorMessage);
+                if (errorMessage != "")
+                {
+                    return Conflict(errorMessage);
+                }
+
+                return Ok("Você foi registrada no sistema. Aguarde enquanto fazemos uma análise interna e, assim que for aprovada, te enviaremos um email com os próximos passos");
+            } catch (Exception ex)
+            {
+                return BadRequest(ex.Message);
+            }
         }
 
         [HttpPut("UpdatePassword")]
@@ -51,10 +64,9 @@ namespace WheresNannyApi.WebApi.Controllers
 
                 if(errorMessage == "")
                 {
-                    return Ok("Senha Alterada com sucesso");
+                    return BadRequest(errorMessage);
                 }
-
-                return BadRequest(errorMessage);
+                return Ok("Senha Alterada com sucesso");
             } catch (Exception ex)
             {
                 return BadRequest(ex.Message);

@@ -21,11 +21,12 @@ namespace WheresNannyApi.WebApi.Controllers
             try
             {
                 var serviceCreatedAsSucessfull = await _servicesService.CreateService(createContractNannyDto);
-                if (serviceCreatedAsSucessfull) {
-                    return Ok("Tudo certo! A soliticação do serviço foi efetuada para a babá. Aguarde a resposta dela para prosseguir ou não com o serviço.");
+                if (!serviceCreatedAsSucessfull) {
+                    return BadRequest("Algo de errado ocorreu durante a contratação da sua babá");
                 }
 
-                return BadRequest("Algo de errado ocorreu durante a contratação da sua babá");
+                return Ok("Tudo certo! A soliticação do serviço foi efetuada para a babá. Aguarde a resposta dela para prosseguir ou não com o serviço.");
+
             } catch (Exception ex)
             {
                 return BadRequest(ex.Message);
@@ -38,12 +39,13 @@ namespace WheresNannyApi.WebApi.Controllers
             try
             {
                 var allServicesByUser = _servicesService.ListAllServices(userId, pageIndex);
-                if (allServicesByUser is not null)
+                if (allServicesByUser is null)
                 {
-                    return Ok(allServicesByUser);
+                    return NotFound("Não foi possível localizar nenhum serviço");
                 }
 
-                return NotFound("Não foi possível localizar nenhum serviço");
+                return Ok(allServicesByUser);
+
             } catch (Exception ex)
             {
                 return BadRequest(ex.Message);
@@ -56,11 +58,11 @@ namespace WheresNannyApi.WebApi.Controllers
             try
             {
                 var nannyServiceInformation = _servicesService.GetNannyServiceInformation(serviceId);
-                if(nannyServiceInformation is not null)
+                if(nannyServiceInformation is null)
                 {
-                    return Ok(nannyServiceInformation);
+                    return NotFound("O serviço selecionado não existe mais");
                 }
-                return NotFound("O serviço selecionado não existe mais");
+                return Ok(nannyServiceInformation);
             } catch(Exception ex)
             {
                 return BadRequest(ex.Message);
