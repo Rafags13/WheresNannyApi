@@ -10,10 +10,10 @@ namespace WheresNannyApi.Application.Interfaces
 {
     public interface IPersonService
     {
-        Task<UserHomeInformationDto> GetUserMainPageInformation(FindCommonUserServicesDto findCommonUserServicesDto);
-        List<NannyCardDto> NannyListOrderedByFilter(ChangeNannyListByFilterDto changeNannyListByFilterDto);
-        NannyContractDto GetNannyInfoToContractById(int id, int userId);
-        UpdateProfileInformationDto? ProfileListInformation(int userId);
-        Task<string> UpdateProfileInformation (UpdateProfileInformationDto updateProfileInformationDto);
+        public Task<UserHomeInformationDto> GetUserMainPageInformation(FindCommonUserServicesDto findCommonUserServicesDto);
+        public List<NannyCardDto> NannyListOrderedByFilter(ChangeNannyListByFilterDto changeNannyListByFilterDto);
+        public NannyContractDto GetNannyInfoToContractById(int id, int userId);
+        public UpdateProfileInformationDto? ProfileListInformation(int userId);
+        public Task<string> UpdateProfileInformation (UpdateProfileInformationDto updateProfileInformationDto);
     }
 }

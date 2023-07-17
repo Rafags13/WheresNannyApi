@@ -71,7 +71,7 @@ namespace WheresNannyApi.Application.Services
                 },
             };
 
-            string response = FirebaseMessaging.DefaultInstance.SendAsync(message).Result;
+            _ = _firebaseMessagerService.SendNotification(message);
 
             return true;
         }

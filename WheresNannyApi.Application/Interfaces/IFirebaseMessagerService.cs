@@ -9,6 +9,6 @@ namespace WheresNannyApi.Application.Interfaces
 {
     public interface IFirebaseMessagerService
     {
-        public void SendNotification(Message message);
+        public string SendNotification(Message message);
     }
 }
