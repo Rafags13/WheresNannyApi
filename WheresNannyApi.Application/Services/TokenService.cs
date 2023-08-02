@@ -84,7 +84,6 @@ namespace WheresNannyApi.Application.Services
                 Subject = new ClaimsIdentity(new[]
             {
                 new Claim("id", generateTokenUserDto.PersonFromToken.User.Id.ToString()),
-                new Claim("imageUri", generateTokenUserDto.PersonFromToken.ImageUri),
                 new Claim("username", generateTokenUserDto.PersonFromToken.User.Username),
                 new Claim(JwtRegisteredClaimNames.Email, generateTokenUserDto.PersonFromToken.Email),
                 new Claim("cep", generateTokenUserDto.PersonFromToken.Address.Cep),
@@ -95,7 +94,7 @@ namespace WheresNannyApi.Application.Services
              }),
                 SigningCredentials = new SigningCredentials
             (new SymmetricSecurityKey(key),
-            SecurityAlgorithms.HmacSha512Signature)
+            SecurityAlgorithms.HmacSha256Signature)
             };
             var tokenHandler = new JwtSecurityTokenHandler();
             var token = tokenHandler.CreateToken(tokenDescriptor);

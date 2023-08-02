@@ -2,6 +2,7 @@
 using Microsoft.Net.Http.Headers;
 using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.Linq;
 using System.Net.Http;
 using System.Text;
@@ -45,8 +46,8 @@ namespace WheresNannyApi.Application.Services
                         address.Cep,
                         address.Number ?? "",
                         address.Complement ?? "",
-                        float.Parse(deserializeNanny.latitude),
-                        float.Parse(deserializeNanny.longitude)
+                        float.Parse(deserializeNanny.latitude, CultureInfo.InvariantCulture),
+                        float.Parse(deserializeNanny.longitude, CultureInfo.InvariantCulture)
                     );
 
                     await _repository.AddAsync(newAddress);

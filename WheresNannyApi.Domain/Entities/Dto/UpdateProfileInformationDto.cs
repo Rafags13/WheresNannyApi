@@ -19,6 +19,7 @@ namespace WheresNannyApi.Domain.Entities.Dto
         public string Cpf { get; set; } = string.Empty;
         public string Email { get; set; } = string.Empty;
         public string Cellphone { get; set; } = string.Empty;
+        public string ImageBase64 { get; set; } = string.Empty;
     }
 
     public class AddressFromUpdateInformationDto

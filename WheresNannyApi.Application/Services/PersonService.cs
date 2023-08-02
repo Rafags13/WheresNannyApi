@@ -26,23 +26,19 @@ namespace WheresNannyApi.Application.Services
 
         public async Task<UserHomeInformationDto> GetUserMainPageInformation(FindCommonUserServicesDto findCommonUserServicesDto)
         {
-            var servicesReference =
-                _unitOfWork.GetRepository<Service>()
-                .GetPagedList(
-                    include: x =>
-                        x.Include(x => x.NannyService)
-                        .ThenInclude(x => x.Person)
-                        )
-                .Items
-                .Where(x => x.PersonId == findCommonUserServicesDto.PersonId);
-            
             var nannyListOrderedByNearCep = NannyListOrderedByFilter(
                 new ChangeNannyListByFilterDto {
                     Filter = "location",
                     Cep = findCommonUserServicesDto.Cep
                 });
 
-            var mostRecentService = servicesReference.OrderByDescending(x => x.HiringDate).FirstOrDefault();
+            var mostRecentService = 
+                _unitOfWork.GetRepository<Service>()
+                .GetFirstOrDefault(
+                    include: x =>
+                        x.Include(x => x.NannyService)
+                            .ThenInclude(x => x.Person),
+                    predicate: x => x.PersonId == findCommonUserServicesDto.PersonId);
             
             var recentCardDto = mostRecentService is not null ?
                 new RecentCardDto
@@ -184,6 +180,7 @@ namespace WheresNannyApi.Application.Services
                     Fullname = currentPerson.Fullname,
                     Cellphone = currentPerson.Cellphone,
                     Email = currentPerson.Email,
+                    ImageBase64 = currentPerson.ImageUri
                 }
             };
 
