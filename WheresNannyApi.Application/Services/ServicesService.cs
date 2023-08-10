@@ -47,8 +47,6 @@ namespace WheresNannyApi.Application.Services
 
             if (string.IsNullOrWhiteSpace(mobileNannyDeviceId)) throw new Exception("A babá não está disponível no momento, tente novamente.");
 
-            var nameFromPersonWhoHire = _unitOfWork.GetRepository<Person>().GetFirstOrDefault(predicate: x => x.Id == createContractNannyDto.PersonId).Fullname;
-           
             await _repository.AddAsync(newService);
             await _repository.SaveChangesAsync();
 
@@ -58,19 +56,24 @@ namespace WheresNannyApi.Application.Services
                 .Items
                 .LastOrDefault();
 
+            var response = new { serviceId = currentService.Id, expireServiceDate = DateTime.Now.AddMinutes(5)};
+            
+            var nameFromPersonWhoHire = _unitOfWork.GetRepository<Person>().GetFirstOrDefault(predicate: x => x.Id == createContractNannyDto.PersonId).Fullname;
             var message = new Message()
             {
                 Data = new Dictionary<string, string>()
                 {
-                    {"message", $"Um novo serviço de {nameFromPersonWhoHire} foi chamado, deseja aceitar?" },
-                    {"serviceId", $"{currentService.Id}" }
+                    {"message", $"Um novo serviço foi chamado, deseja aceitar?" },
+                    {"response", Newtonsoft.Json.JsonConvert.SerializeObject(response)}
                 },
                 Token = mobileNannyDeviceId,
                 Notification = new Notification()
                 {
                     Title = "Novo serviço",
-                    Body = $"Um novo serviço de {nameFromPersonWhoHire} foi chamado, deseja aceitar?",
+                    Body = $"Um novo serviço foi chamado, deseja aceitar?",
                 },
+                
+                Webpush = new WebpushConfig { Headers = new Dictionary<string, string>() { { "TTL", "30" } } }
             };
 
             _ = _firebaseMessagerService.SendNotification(message);
@@ -155,18 +158,37 @@ namespace WheresNannyApi.Application.Services
             }
 
             var acceptedServiceMessage = acceptedServiceDto.Accepted ? "Foi aceito" : "Foi recusado";
+
+            object response = new { };
+
+            if(acceptedServiceDto.Accepted)
+            {
+                response = new
+                {
+                    accepted = acceptedServiceDto.Accepted,
+                    serviceId = acceptedServiceDto.ServiceId.ToString(),
+                    chatPersonName = currentService.NannyService.Person.Fullname
+                };
+            } else
+            {
+                response = new
+                {
+                    accepted = acceptedServiceDto.Accepted
+                };
+            }
+
             var message = new Message()
             {
                 Data = new Dictionary<string, string>()
                 {
-                    {"message", $"O serviço da babá {currentService?.PersonService?.Fullname} {acceptedServiceMessage}" },
-                    {"accepted", acceptedServiceDto.Accepted ? "true" : "false" }
+                    {"message", $"O serviço da babá {currentService?.NannyService.Person.Fullname} {acceptedServiceMessage}" },
+                    {"response", Newtonsoft.Json.JsonConvert.SerializeObject(response)}
                 },
                 Token = currentService?.PersonService?.User?.DeviceId,
                 Notification = new Notification()
                 {
                     Title = "Novo serviço",
-                    Body = $"O serviço da babá {currentService?.PersonService?.Fullname} {acceptedServiceMessage}",
+                    Body = $"O serviço da babá {currentService?.NannyService.Person.Fullname} {acceptedServiceMessage}",
                 },
             };
 
