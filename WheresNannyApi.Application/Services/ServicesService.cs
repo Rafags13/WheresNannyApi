@@ -9,6 +9,7 @@ using System.Text;
 using System.Threading.Tasks;
 using TanvirArjel.EFCore.GenericRepository;
 using WheresNannyApi.Application.Interfaces;
+using WheresNannyApi.Application.Util;
 using WheresNannyApi.Domain.Entities;
 using WheresNannyApi.Domain.Entities.Dto;
 
@@ -52,10 +53,8 @@ namespace WheresNannyApi.Application.Services
 
             var currentService =
                 _unitOfWork.GetRepository<Service>()
-                .GetPagedList()
-                .Items
-                .LastOrDefault();
-
+                .GetFirstOrDefault(
+                    orderBy: x => x.OrderByDescending(x => x.Id));
             var response = new { serviceId = currentService.Id, expireServiceDate = DateTime.Now.AddMinutes(5)};
             
             var nameFromPersonWhoHire = _unitOfWork.GetRepository<Person>().GetFirstOrDefault(predicate: x => x.Id == createContractNannyDto.PersonId).Fullname;
@@ -72,8 +71,6 @@ namespace WheresNannyApi.Application.Services
                     Title = "Novo serviço",
                     Body = $"Um novo serviço foi chamado, deseja aceitar?",
                 },
-                
-                Webpush = new WebpushConfig { Headers = new Dictionary<string, string>() { { "TTL", "30" } } }
             };
 
             _ = _firebaseMessagerService.SendNotification(message);
@@ -193,6 +190,67 @@ namespace WheresNannyApi.Application.Services
             };
 
             _firebaseMessagerService.SendNotification(message);
+        }
+        #endregion
+
+        #region Display Service From Parent
+        #endregion
+
+        #region Display Service From Nanny
+        public ServiceNannyInformationDto GetServiceInformationsFromNanny(int serviceId)
+        {
+            var serviceInformations =
+                _unitOfWork.GetRepository<Service>()
+                .GetFirstOrDefault(
+                    predicate: x => x.Id == serviceId,
+                    include: x =>
+                        x.Include(x => x.PersonService)
+                            .ThenInclude(x => x.Address)
+                         .Include(x => x.PersonService)
+                         .Include(x => x.NannyService)
+                         .Include(x => x.NannyService)
+                            .ThenInclude(x => x.Person)
+                                .ThenInclude(x => x.Address))
+                ?? throw new Exception("Não foi possível encontrar o serviço. Contate um administrador.");
+
+            var firstCoordinate = new CoordinateDto 
+            {
+                Latitude = serviceInformations.PersonService.Address.Latitude ?? 0.0f,
+                Longitude = serviceInformations.PersonService.Address.Longitude ?? 0.0f,
+            };
+
+            var secondCoordinate = new CoordinateDto
+            {
+                Latitude = serviceInformations.NannyService.Person.Address.Latitude ?? 0.0f,
+                Longitude = serviceInformations.NannyService.Person.Address.Longitude ?? 0.0f,
+            };
+
+            var distance = Functions.DistanceBetweenTwoPoints(firstCoordinate, secondCoordinate);
+
+            var data = new ServiceNannyInformationDto
+            {
+                ParentName = serviceInformations.PersonService.Fullname,
+                ParentEmail = serviceInformations.PersonService.Email,
+                ParentCellphone = serviceInformations.PersonService.Cellphone,
+                ParentBirthdayDate = serviceInformations.PersonService.BirthdayDate,
+                ParentPictureBase64 = serviceInformations.PersonService.ImageUri,
+                ParentCep = serviceInformations.PersonService.Address.Cep,
+                ServiceFinishHour = serviceInformations.ServiceFinishHour,
+                ServicePrice = serviceInformations.Price,
+                Distance = distance,
+                OriginCoordinates = new CoordinateDto
+                {
+                    Latitude = serviceInformations.PersonService.Address.Latitude ?? 0.0f,
+                    Longitude = serviceInformations.PersonService.Address.Longitude ?? 0.0f
+                },
+                DestinationCoordinates = new CoordinateDto
+                {
+                    Latitude = serviceInformations.NannyService.Person.Address.Latitude ?? 0.0f,
+                    Longitude = serviceInformations.NannyService.Person.Address.Longitude ?? 0.0f
+                }
+            };
+
+            return data;
         }
         #endregion
     }

@@ -3,6 +3,7 @@ using GeoCoordinatePortable;
 using Microsoft.EntityFrameworkCore;
 using TanvirArjel.EFCore.GenericRepository;
 using WheresNannyApi.Application.Interfaces;
+using WheresNannyApi.Application.Util;
 using WheresNannyApi.Domain.Entities;
 using WheresNannyApi.Domain.Entities.Dto;
 
@@ -140,10 +141,19 @@ namespace WheresNannyApi.Application.Services
                             .ThenInclude(x => x.Address)
                         .Include(x => x.CommentsRankNanny), predicate: x => x.Id == id);
 
-            GeoCoordinate currentPersonCoordinate = new GeoCoordinate(currentPerson.Address.Latitude ?? 0.0, currentPerson.Address.Longitude ?? 0.0);
-            GeoCoordinate nannyPersonCoordinate = new GeoCoordinate(currentNanny.Person.Address.Latitude ?? 0.0, currentNanny.Person.Address.Longitude ?? 0.0);
+            var firstCoordinate = new CoordinateDto
+            {
+                Latitude = currentPerson.Address.Latitude ?? 0.0f,
+                Longitude = currentPerson.Address.Longitude ?? 0.0f 
+            };
 
-            double distanceBetweenPersonAndNanny = currentPersonCoordinate.GetDistanceTo(nannyPersonCoordinate);
+            var secondCoordinate = new CoordinateDto
+            {
+                Latitude = currentNanny.Person.Address.Latitude ?? 0.0f,
+                Longitude = currentNanny.Person.Address.Longitude ?? 0.0f
+            };
+
+            double distanceBetweenPersonAndNanny = Functions.DistanceBetweenTwoPoints(firstCoordinate, secondCoordinate);
 
             var nannyContractInformation = new NannyContractDto
             {
