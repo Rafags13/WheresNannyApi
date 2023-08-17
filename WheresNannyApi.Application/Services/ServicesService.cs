@@ -71,6 +71,7 @@ namespace WheresNannyApi.Application.Services
                     Title = "Novo serviço",
                     Body = $"Um novo serviço foi chamado, deseja aceitar?",
                 },
+                Android = new AndroidConfig { Priority = Priority.High}
             };
 
             _ = _firebaseMessagerService.SendNotification(message);
@@ -193,11 +194,8 @@ namespace WheresNannyApi.Application.Services
         }
         #endregion
 
-        #region Display Service From Parent
-        #endregion
-
-        #region Display Service From Nanny
-        public ServiceNannyInformationDto GetServiceInformationsFromNanny(int serviceId)
+        #region Display Service
+        public ServiceInformationDto GetServiceInformations(int serviceId, bool isNanny)
         {
             var serviceInformations =
                 _unitOfWork.GetRepository<Service>()
@@ -213,40 +211,68 @@ namespace WheresNannyApi.Application.Services
                                 .ThenInclude(x => x.Address))
                 ?? throw new Exception("Não foi possível encontrar o serviço. Contate um administrador.");
 
-            var firstCoordinate = new CoordinateDto 
-            {
-                Latitude = serviceInformations.PersonService.Address.Latitude ?? 0.0f,
-                Longitude = serviceInformations.PersonService.Address.Longitude ?? 0.0f,
-            };
+            var distance = Functions.GetDistanceBetweenTwoPoints(
+                serviceInformations.PersonService.Address,
+                serviceInformations.NannyService.Person.Address
+                );
 
-            var secondCoordinate = new CoordinateDto
-            {
-                Latitude = serviceInformations.NannyService.Person.Address.Latitude ?? 0.0f,
-                Longitude = serviceInformations.NannyService.Person.Address.Longitude ?? 0.0f,
-            };
+            var data = isNanny ? 
+                ConstructServiceDisplayDtoFromNanny(serviceInformations) : 
+                ConstructServiceDisplayDtoFromPerson(serviceInformations);
 
-            var distance = Functions.DistanceBetweenTwoPoints(firstCoordinate, secondCoordinate);
+            data.Distance = distance;
 
-            var data = new ServiceNannyInformationDto
+            return data;
+        }
+
+        private ServiceInformationDto ConstructServiceDisplayDtoFromNanny(Service service)
+        {
+            var data = new ServiceInformationDto
             {
-                ParentName = serviceInformations.PersonService.Fullname,
-                ParentEmail = serviceInformations.PersonService.Email,
-                ParentCellphone = serviceInformations.PersonService.Cellphone,
-                ParentBirthdayDate = serviceInformations.PersonService.BirthdayDate,
-                ParentPictureBase64 = serviceInformations.PersonService.ImageUri,
-                ParentCep = serviceInformations.PersonService.Address.Cep,
-                ServiceFinishHour = serviceInformations.ServiceFinishHour,
-                ServicePrice = serviceInformations.Price,
-                Distance = distance,
+                Name = service.PersonService.Fullname,
+                Email = service.PersonService.Email,
+                Cellphone = service.PersonService.Cellphone,
+                BirthdayDate = service.PersonService.BirthdayDate,
+                PictureBase64 = service.PersonService.ImageUri,
+                Cep = service.PersonService.Address.Cep,
+                ServiceFinishHour = service.ServiceFinishHour,
+                ServicePrice = service.Price,
                 OriginCoordinates = new CoordinateDto
                 {
-                    Latitude = serviceInformations.PersonService.Address.Latitude ?? 0.0f,
-                    Longitude = serviceInformations.PersonService.Address.Longitude ?? 0.0f
+                    Latitude = service.PersonService.Address.Latitude ?? 0.0f,
+                    Longitude = service.PersonService.Address.Longitude ?? 0.0f
                 },
                 DestinationCoordinates = new CoordinateDto
                 {
-                    Latitude = serviceInformations.NannyService.Person.Address.Latitude ?? 0.0f,
-                    Longitude = serviceInformations.NannyService.Person.Address.Longitude ?? 0.0f
+                    Latitude = service.NannyService.Person.Address.Latitude ?? 0.0f,
+                    Longitude = service.NannyService.Person.Address.Longitude ?? 0.0f
+                }
+            };
+
+            return data;
+        }
+
+        private ServiceInformationDto ConstructServiceDisplayDtoFromPerson(Service service)
+        {
+            var data = new ServiceInformationDto
+            {
+                Name = service.NannyService.Person.Fullname,
+                Email = service.NannyService.Person.Email,
+                Cellphone = service.NannyService.Person.Cellphone,
+                BirthdayDate = service.NannyService.Person.BirthdayDate,
+                PictureBase64 = service.NannyService.Person.ImageUri,
+                Cep = service.NannyService.Person.Address.Cep,
+                ServiceFinishHour = service.ServiceFinishHour,
+                ServicePrice = service.Price,
+                OriginCoordinates = new CoordinateDto
+                {
+                    Latitude = service.NannyService.Person.Address.Latitude ?? 0.0f,
+                    Longitude = service.NannyService.Person.Address.Longitude ?? 0.0f
+                },
+                DestinationCoordinates = new CoordinateDto
+                {
+                    Latitude = service.PersonService.Address.Latitude ?? 0.0f,
+                    Longitude = service.PersonService.Address.Longitude ?? 0.0f
                 }
             };
 

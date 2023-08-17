@@ -12,7 +12,7 @@ namespace WheresNannyApi.Application.Interfaces
         public Task<bool> CreateService(CreateContractNannyDto createContractNannyDto);
         public List<RecentCardDto> ListAllServices(int userId, int pageIndex);
         public NannyServiceInformationDto GetNannyServiceInformation(int serviceId);
-        public ServiceNannyInformationDto GetServiceInformationsFromNanny(int serviceId);
+        public ServiceInformationDto GetServiceInformations(int serviceId, bool isNanny);
         public void ServiceAccepted(AcceptedServiceDto acceptedServiceDto);
     }
 }

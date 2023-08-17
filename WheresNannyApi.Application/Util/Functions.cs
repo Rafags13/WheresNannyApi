@@ -19,12 +19,34 @@ namespace WheresNannyApi.Application.Util
             return inputEncrypted;
         }
 
-        public static double DistanceBetweenTwoPoints(CoordinateDto firstCoordinate, CoordinateDto secondCoordinate)
+
+        private static double CalculateDistaceBetweenTwoPoints(PointsInMapDto points)
         {
-            GeoCoordinate currentPersonCoordinate = new GeoCoordinate(firstCoordinate.Latitude, firstCoordinate.Longitude);
-            GeoCoordinate nannyPersonCoordinate = new GeoCoordinate(secondCoordinate.Latitude, secondCoordinate.Longitude);
+            GeoCoordinate currentPersonCoordinate = new GeoCoordinate(points.OriginCoordinate.Latitude, points.OriginCoordinate.Longitude);
+            GeoCoordinate nannyPersonCoordinate = new GeoCoordinate(points.FinalCoordinate.Latitude, points.FinalCoordinate.Longitude);
 
             return currentPersonCoordinate.GetDistanceTo(nannyPersonCoordinate);
+        }
+
+        public static double GetDistanceBetweenTwoPoints(Address originAddress, Address finalAddress)
+        {
+            var firstCoordinate = new CoordinateDto
+            {
+                Latitude = originAddress.Latitude ?? 0.0f,
+                Longitude = originAddress.Longitude ?? 0.0f,
+            };
+
+            var secondCoordinate = new CoordinateDto
+            {
+                Latitude = finalAddress.Latitude ?? 0.0f,
+                Longitude = finalAddress.Longitude ?? 0.0f,
+            };
+
+            var points = new PointsInMapDto { OriginCoordinate = firstCoordinate, FinalCoordinate = secondCoordinate };
+
+            var distance = CalculateDistaceBetweenTwoPoints(points);
+
+            return distance;
         }
     }
 }

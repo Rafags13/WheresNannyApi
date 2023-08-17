@@ -94,7 +94,23 @@ namespace WheresNannyApi.WebApi.Controllers
         {
             try
             {
-                var serviceInformation = _servicesService.GetServiceInformationsFromNanny(serviceId);
+                var serviceInformation = _servicesService.GetServiceInformations(serviceId, true);
+                return Ok(serviceInformation);
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(ex.Message);
+            }
+        }
+
+
+        [HttpGet("GetServiceInformationsFromPerson/{serviceId}")]
+        [Authorize]
+        public IActionResult GetServiceInformationsFromPerson([FromRoute] int serviceId)
+        {
+            try
+            {
+                var serviceInformation = _servicesService.GetServiceInformations(serviceId, false);
                 return Ok(serviceInformation);
             }
             catch (Exception ex)

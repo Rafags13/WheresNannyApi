@@ -141,19 +141,10 @@ namespace WheresNannyApi.Application.Services
                             .ThenInclude(x => x.Address)
                         .Include(x => x.CommentsRankNanny), predicate: x => x.Id == id);
 
-            var firstCoordinate = new CoordinateDto
-            {
-                Latitude = currentPerson.Address.Latitude ?? 0.0f,
-                Longitude = currentPerson.Address.Longitude ?? 0.0f 
-            };
-
-            var secondCoordinate = new CoordinateDto
-            {
-                Latitude = currentNanny.Person.Address.Latitude ?? 0.0f,
-                Longitude = currentNanny.Person.Address.Longitude ?? 0.0f
-            };
-
-            double distanceBetweenPersonAndNanny = Functions.DistanceBetweenTwoPoints(firstCoordinate, secondCoordinate);
+            double distanceBetweenPersonAndNanny = 
+                Functions.GetDistanceBetweenTwoPoints(
+                    currentPerson.Address, 
+                    currentNanny.Person.Address);
 
             var nannyContractInformation = new NannyContractDto
             {
