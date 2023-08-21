@@ -39,8 +39,8 @@ namespace WheresNannyApi.Application.Services
                 new CreateAddressDto()
                 {
                     Cep = userRegisterDto.Cep,
-                    Number = userRegisterDto.HouseNumber,
-                    Complement = userRegisterDto.Complement
+                    Number = userRegisterDto.HouseNumber ?? "",
+                    Complement = userRegisterDto.Complement ?? ""
                 });
 
             if (!sucessfulCreateAddress) return "Não foi possível criar o endereço informado.";

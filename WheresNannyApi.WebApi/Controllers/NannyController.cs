@@ -17,11 +17,11 @@ namespace WheresNannyApi.WebApi.Controllers
 
         [HttpGet("GetAllServices/{userId}/{pageIndex}")]
         [Authorize]
-        public async Task<IActionResult> GetAllServices([FromRoute] int userId, int pageIndex)
+        public IActionResult GetAllServices([FromRoute] int userId, int pageIndex)
         {
             try
             {
-                var services = await _nannyService.GetAllNannyServices(userId, pageIndex);
+                var services = _nannyService.GetAllNannyServices(userId, pageIndex);
 
                 if (services == null) return NotFound("Nenhum serviço foi encontrado.");
 

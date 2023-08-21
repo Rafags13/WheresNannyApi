@@ -20,7 +20,7 @@ namespace WheresNannyApi.Domain.Entities
         public float ServicePrice { get; set; }
         public bool ApprovedToWork { get; set; } = false;
         public int PersonId { get; set; }
-        public Person? Person { get; set; }
+        public Person Person { get; set; } = new Person();
         public ICollection<Service>? ServicesNanny { get; set; }
         public ICollection<CommentRank>? CommentsRankNanny { get; set; }
 

@@ -13,13 +13,15 @@ namespace WheresNannyApi.Domain.Entities
             Username = username;
             Password = password;
         }
+
+        public User() { }
         public int Id { get; set; }
-        public string Username { get; set; }
-        public string Password { get; set; }
-        public string DeviceId { get; set; }
+        public string Username { get; set; } = string.Empty;
+        public string Password { get; set; } = string.Empty;
+        public string DeviceId { get; set; } = string.Empty;
         public string? Token { get; set; }
         public DateTime? ExpiresIn { get; set; }
         public DateTime? CreatedIn { get; set; }
-        public Person? Person { get; set; }  
+        public Person Person { get; set; } = new Person();
     }
 }

@@ -25,7 +25,7 @@ namespace WheresNannyApi.Application.Services
 
         #region Common User Home Information
 
-        public async Task<UserHomeInformationDto> GetUserMainPageInformation(FindCommonUserServicesDto findCommonUserServicesDto)
+        public UserHomeInformationDto GetUserMainPageInformation(FindCommonUserServicesDto findCommonUserServicesDto)
         {
             var nannyListOrderedByNearCep = NannyListOrderedByFilter(
                 new ChangeNannyListByFilterDto {
@@ -38,13 +38,13 @@ namespace WheresNannyApi.Application.Services
                 .GetFirstOrDefault(
                     include: x =>
                         x.Include(x => x.NannyService)
-                            .ThenInclude(x => x.Person),
+                            .ThenInclude(x => x!.Person),
                     predicate: x => x.PersonId == findCommonUserServicesDto.PersonId);
             
             var recentCardDto = mostRecentService is not null ?
                 new RecentCardDto
             {
-                PersonName = mostRecentService.NannyService.Person.Fullname,
+                PersonName = mostRecentService.NannyService!.Person.Fullname,
                 ImageUri = mostRecentService.NannyService.Person.ImageUri,
                 ServiceId = mostRecentService.Id,
                 Date = mostRecentService.HiringDate
@@ -82,16 +82,16 @@ namespace WheresNannyApi.Application.Services
             return listNannyCardObject;
         }
 
-        private List<Nanny> NannyListOrderedByNearCep(IList<Nanny>? nannies, string cep)
+        private static List<Nanny> NannyListOrderedByNearCep(IList<Nanny> nannies, string cep)
         {
             if (nannies is null) return new List<Nanny>();
 
-            nannies.Select(x => x.Person?.Address?.Cep).ToList().Sort((a, b) => Math.Abs(int.Parse(cep) - int.Parse(a)) - Math.Abs(int.Parse(cep) - int.Parse(b)));
+            nannies.Select(x => x.Person.Address.Cep).ToList().Sort((a, b) => Math.Abs(int.Parse(cep) - int.Parse(a)) - Math.Abs(int.Parse(cep) - int.Parse(b)));
 
             return nannies.ToList();
         }
 
-        private List<Nanny> NannyListOrderedByRank(IList<Nanny>? nannies)
+        private static List<Nanny> NannyListOrderedByRank(IList<Nanny>? nannies)
         {
             if (nannies is null) return new List<Nanny>();
 
@@ -226,7 +226,7 @@ namespace WheresNannyApi.Application.Services
             }
             else
             {
-                currentUser.AddressId = currentAddress.Id;
+                currentUser.AddressId = currentAddress!.Id;
             }
 
             _repository.Update(currentUser);

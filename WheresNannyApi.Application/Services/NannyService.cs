@@ -26,11 +26,14 @@ namespace WheresNannyApi.Application.Services
         }
 
         #region Get All Services
-        public async Task<List<ServiceNannyCardDto>> GetAllNannyServices(int userId, int pageIndex)
+        public List<ServiceNannyCardDto> GetAllNannyServices(int userId, int pageIndex)
         {
-            var currentNannyId = _unitOfWork.GetRepository<Nanny>().GetFirstOrDefault(include: x =>
+            var currentNannyId = 
+                _unitOfWork.GetRepository<Nanny>()
+                .GetFirstOrDefault(include: x =>
                     x.Include(x => x.Person)
-                    .Include(x => x.ServicesNanny), predicate: x => x.Person.UserId == userId).Id;
+                    .Include(x => x.ServicesNanny), 
+                        predicate: x => x.Person!.UserId == userId).Id;
 
             var currentServicesFromNanny =
                 _unitOfWork.GetRepository<Service>()
@@ -45,7 +48,7 @@ namespace WheresNannyApi.Application.Services
                 {
                     ServiceId = x.Id,
                     HiringDate = x.HiringDate,
-                    ClientName = x.PersonService.Fullname,
+                    ClientName = x.PersonService!.Fullname,
                     ServicePrice = x.Price
                 }).ToList();
 
@@ -60,7 +63,7 @@ namespace WheresNannyApi.Application.Services
 
             var currentNanny = _unitOfWork.GetRepository<Nanny>().GetFirstOrDefault(include: x =>
                     x.Include(x => x.Person)
-                    .Include(x => x.ServicesNanny), predicate: x => x.Person.UserId == userId);
+                    .Include(x => x.ServicesNanny), predicate: x => x.Person!.UserId == userId);
 
             var lastServiceFromNanny =
                 _unitOfWork.GetRepository<Service>()
@@ -68,7 +71,7 @@ namespace WheresNannyApi.Application.Services
                     x.Include(x => x.PersonService))
                 .Items
                 .Where(x => x.NannyId == currentNanny.Id)
-                .Select(x => new ServiceNannyCardDto { ClientName = x.PersonService.Fullname, ServiceId = x.Id, HiringDate = x.HiringDate, ServicePrice = x.Price })
+                .Select(x => new ServiceNannyCardDto { ClientName = x.PersonService!.Fullname, ServiceId = x.Id, HiringDate = x.HiringDate, ServicePrice = x.Price })
                 .LastOrDefault();
 
             var serviceList = _unitOfWork.GetRepository<Service>().GetPagedList().Items.Where(x => x.NannyId == currentNanny.Id);

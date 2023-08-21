@@ -18,11 +18,11 @@ namespace WheresNannyApi.WebApi.Controllers
 
         [HttpPost("GetUserHomeInformation")]
         [Authorize]
-        public async Task<IActionResult> GetUserMainPageInformation(FindCommonUserServicesDto findCommonUserServicesDto)
+        public IActionResult GetUserMainPageInformation(FindCommonUserServicesDto findCommonUserServicesDto)
         {
             try
             {
-                var nannys = await _personService.GetUserMainPageInformation(findCommonUserServicesDto);
+                var nannys = _personService.GetUserMainPageInformation(findCommonUserServicesDto);
 
                 if (nannys == null)
                 {
