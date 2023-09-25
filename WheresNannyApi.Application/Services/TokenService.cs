@@ -38,9 +38,12 @@ namespace WheresNannyApi.Application.Services
         public async Task<string> Login(UserLoginDto user)
         {
             var passwordEncrypted = Functions.Sha1Encrypt(user.Password);
-            var userFounded = await _repository.GetAsync<User>(x => x.Username == user.Username && x.Password == passwordEncrypted)
-                ?? throw new Exception("O usuário não foi encontrado no sistema ou a senha está incorreta.");
-
+            var userFounded = await _repository.GetAsync<User>(x => x.Username == user.Username && x.Password == passwordEncrypted);
+            if (userFounded is null)
+            {
+                throw new Exception("O usuário não foi encontrado no sistema ou a senha está incorreta.");
+            }
+                
             var currentPerson =
                 _unitOfWork.GetRepository<Person>()
                 .GetFirstOrDefault(
