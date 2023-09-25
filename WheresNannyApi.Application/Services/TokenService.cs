@@ -39,9 +39,11 @@ namespace WheresNannyApi.Application.Services
         {
             var passwordEncrypted = Functions.Sha1Encrypt(user.Password);
             var userFounded = await _repository.GetAsync<User>(x => x.Username == user.Username && x.Password == passwordEncrypted);
-
-            if (userFounded == null) return null;
-
+            if (userFounded is null)
+            {
+                throw new Exception("O usuário não foi encontrado no sistema ou a senha está incorreta.");
+            }
+                
             var currentPerson =
                 _unitOfWork.GetRepository<Person>()
                 .GetFirstOrDefault(
@@ -53,11 +55,11 @@ namespace WheresNannyApi.Application.Services
   
             TypeOfUser typeOfUser = currentPerson.Nanny is not null ? TypeOfUser.Nanny : TypeOfUser.CommonUser;
 
-            if (currentPerson == null) return null;
+            if (currentPerson == null) throw new Exception("Ocorreu um erro ao tentar carregar as informações pessoais. Contate um Administrador do sistema.;");
 
             DateTime timeToExpire = DateTime.UtcNow.AddMinutes(5); // Add session time in future
 
-            GenerateTokenUserDto generateTokenUserDto = new GenerateTokenUserDto(currentPerson, timeToExpire, user.DeviceId, typeOfUser);
+            GenerateTokenUserDto generateTokenUserDto = new(currentPerson, timeToExpire, user.DeviceId, typeOfUser);
 
             var jwtToken = GenerateTokenBasedInUser(generateTokenUserDto);
 

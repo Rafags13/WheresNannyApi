@@ -25,11 +25,11 @@ namespace WheresNannyApi.Domain.Entities
 
         public Address() { }
         public int Id { get; set; }
-        public string Cep { get; set; }
-        public string HouseNumber { get; set; }
-        public string Complement { get; set; }
+        public string Cep { get; set; } = string.Empty;
+        public string HouseNumber { get; set; } = string.Empty;
+        public string Complement { get; set; } = string.Empty;
         public float? Latitude { get; set; }
         public float? Longitude { get; set; }
-        public ICollection<Person>? PersonsWhoHasThisAddress { get; set; }
+        public ICollection<Person>? PersonsWhoHasThisAddress { get; set; } = new List<Person>();
     }
 }

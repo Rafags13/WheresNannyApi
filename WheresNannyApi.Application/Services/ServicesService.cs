@@ -43,7 +43,7 @@ namespace WheresNannyApi.Application.Services
                     include: x =>
                         x.Include(x => x.Person)
                             .ThenInclude(x => x.Nanny),
-                   predicate: x => x.Person.Nanny.Id == createContractNannyDto.NannyId)
+                   predicate: x => x.Person.Nanny!.Id == createContractNannyDto.NannyId)
                 .DeviceId;
 
             if (string.IsNullOrWhiteSpace(mobileNannyDeviceId)) throw new Exception("A babá não está disponível no momento, tente novamente.");
@@ -93,7 +93,7 @@ namespace WheresNannyApi.Application.Services
                 .Where(x => x.PersonId == userId)
                 .Select(x => new RecentCardDto
                 {
-                    PersonName = x.NannyService.Person.Fullname,
+                    PersonName = x.NannyService!.Person.Fullname,
                     ImageUri = x.NannyService.Person.ImageUri,
                     ServiceId = x.Id,
                     Date = x.HiringDate
@@ -119,12 +119,14 @@ namespace WheresNannyApi.Application.Services
                             .ThenInclude(x => x.Address)
                     );
 
+            if (currentService is null) throw new Exception("O serviço buscado não foi encontrado no sistema. Contate um Administrador.");
+
             NannyServiceInformationDto serviceInformation = 
                 new()
                 {
-                    ParentName = currentService?.PersonService?.Fullname,
-                    NannyName = currentService?.NannyService.Person.Fullname,
-                    Cep = currentService?.PersonService.Address.Cep,
+                    ParentName = currentService.PersonService!.Fullname,
+                    NannyName = currentService.NannyService.Person.Fullname,
+                    Cep = currentService.PersonService.Address.Cep,
                     HiringDate = currentService.HiringDate,
                     NannyCountStars = currentService.NannyService.RankAvegerageStars,
                     NannyId = currentService.NannyService.Id,
@@ -143,9 +145,9 @@ namespace WheresNannyApi.Application.Services
                 .GetFirstOrDefault(
                     include: x => 
                         x.Include(x => x.NannyService)
-                            .ThenInclude(x => x.Person)
+                            .ThenInclude(x => x!.Person)
                         .Include(x => x.PersonService)
-                            .ThenInclude(x => x.User),
+                            .ThenInclude(x => x!.User),
                     predicate: x => x.Id == acceptedServiceDto.ServiceId);
 
             if(currentService != null)
@@ -165,7 +167,7 @@ namespace WheresNannyApi.Application.Services
                 {
                     accepted = acceptedServiceDto.Accepted,
                     serviceId = acceptedServiceDto.ServiceId.ToString(),
-                    chatPersonName = currentService.NannyService.Person.Fullname
+                    chatPersonName = currentService!.NannyService.Person.Fullname
                 };
             } else
             {
