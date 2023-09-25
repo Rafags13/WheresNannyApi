@@ -67,7 +67,7 @@ builder.Services.AddControllers().AddJsonOptions(options =>
 
 FirebaseApp.Create(new AppOptions()
 {
-    Credential = GoogleCredential.FromFile("./wheresnanny-b0f73-firebase-adminsdk-t4mbp-b8600e8454.json")
+    Credential = GoogleCredential.FromFile("./firebase-notifications-adminsdk.json") // SDK from firebase notifications
 });
 
 var app = builder.Build();
