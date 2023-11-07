@@ -280,6 +280,14 @@ namespace WheresNannyApi.Application.Services
 
             return data;
         }
+
+        #endregion
+
+        #region Cancel the service
+        public bool CancelTheService(int serviceId)
+        {
+            return true;
+        }
         #endregion
     }
 }

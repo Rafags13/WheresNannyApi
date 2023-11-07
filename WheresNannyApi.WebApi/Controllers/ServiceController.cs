@@ -118,5 +118,27 @@ namespace WheresNannyApi.WebApi.Controllers
                 return BadRequest(ex.Message);
             }
         }
+
+        [HttpPost("CancelService/{serviceId}")]
+        [Authorize]
+        public IActionResult CancelTheService([FromRoute] int serviceId)
+        {
+            try
+            {
+                var sucessful = _servicesService.CancelTheService(serviceId);
+
+                if(!sucessful)
+                {
+                    return BadRequest("Não foi possível cancelar o serviço. Tente novamente, mais tarde");
+                }
+
+                return Ok("Serviço cancelado com sucesso!");
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(ex.Message);
+                throw;
+            }
+        }
     }
 }
