@@ -121,18 +121,13 @@ namespace WheresNannyApi.WebApi.Controllers
 
         [HttpPost("CancelService/{serviceId}")]
         [Authorize]
-        public async Task<IActionResult> CancelTheService([FromRoute] int serviceId, [FromQuery] bool isClient)
+        public async Task<IActionResult> CancelTheService([FromRoute] int serviceId, [FromQuery(Name = "isClient")] bool isClient)
         {
             try
             {
-                var sucessful = await _servicesService.CancelTheService(serviceId, isClient);
+                var message = await _servicesService.CancelTheService(serviceId, isClient);
 
-                if(!sucessful)
-                {
-                    return BadRequest("Não foi possível cancelar o serviço. Tente novamente, mais tarde");
-                }
-
-                return Ok("Serviço cancelado com sucesso!");
+                return Ok(message);
             }
             catch (Exception ex)
             {

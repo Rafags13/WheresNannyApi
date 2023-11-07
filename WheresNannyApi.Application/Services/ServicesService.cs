@@ -285,7 +285,7 @@ namespace WheresNannyApi.Application.Services
         #endregion
 
         #region Cancel the service
-        public async Task<bool> CancelTheService(int serviceId, bool isClient)
+        public async Task<string> CancelTheService(int serviceId, bool isClient)
         {
             var currentService = 
                 _unitOfWork.GetRepository<Service>()
@@ -298,29 +298,24 @@ namespace WheresNannyApi.Application.Services
                         .Include(x => x.PersonService)
                         .ThenInclude(x => x.User));
 
-            if (currentService == null)
-            {
-                throw new Exception("O serviço informado não foi encontrado");
-            }
-
+            if (currentService == null) throw new Exception("O serviço informado não foi encontrado");
+            
             var personToSendNotification =
                 isClient ? currentService?.NannyService?.Person?.User?.DeviceId : currentService?.PersonService?.User?.DeviceId;
 
-            var twoPercentOfServicePrice = currentService?.Price * 0.02m;
-            var messageToPersonWhoCanceled = isClient ? $"Você deverá pagar uma taxa de {twoPercentOfServicePrice}" :
-                                    "A babá cancelou o serviço. Desculpe-nos pelo transtorno";
+            var messageToDisapointedPerson = $"{(isClient ? "O cliente" : "a babá") } cancelou o serviço. Desculpe-nos pelo transtorno";
 
             var message = new Message()
             {
                 Data = new Dictionary<string, string>()
                 {
-                    {"message", messageToPersonWhoCanceled },
+                    {"message", messageToDisapointedPerson },
                 },
                 Token = personToSendNotification,
                 Notification = new Notification()
                 {
                     Title = "Novo serviço",
-                    Body = messageToPersonWhoCanceled
+                    Body = messageToDisapointedPerson
                 },
                 Android = new AndroidConfig { Priority = Priority.High }
             };
@@ -332,7 +327,14 @@ namespace WheresNannyApi.Application.Services
             _unitOfWork.GetRepository<Service>().Update(currentService);
             var sucessful = await _unitOfWork.SaveChangesAsync() > 0;
 
-            return sucessful;
+            if (!sucessful) throw new Exception("Não foi possível cancelar o serviço. Tente novamente, mais tarde");
+
+            var twoPercentOfServicePrice = currentService?.Price * 0.02m;
+
+            var messageToReturnForPersonWhoCanceled = isClient ? $"Você deverá pagar a taxa simbólica de 2% pelo cancelamento: R$ {twoPercentOfServicePrice}" :
+                "Evite  de cancelar serviços, isso pode gerar frustrações nos clientes e evitar futuros chamados.";
+
+            return messageToReturnForPersonWhoCanceled;
         }
         #endregion
     }
