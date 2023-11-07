@@ -14,6 +14,6 @@ namespace WheresNannyApi.Application.Interfaces
         public NannyServiceInformationDto GetNannyServiceInformation(int serviceId);
         public ServiceInformationDto GetServiceInformations(int serviceId, bool isNanny);
         public void ServiceAccepted(AcceptedServiceDto acceptedServiceDto);
-        public bool CancelTheService(int serviceId);
+        public Task<bool> CancelTheService(int serviceId, bool isClient);
     }
 }

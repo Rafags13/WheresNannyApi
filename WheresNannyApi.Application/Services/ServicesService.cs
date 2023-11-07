@@ -12,6 +12,7 @@ using WheresNannyApi.Application.Interfaces;
 using WheresNannyApi.Application.Util;
 using WheresNannyApi.Domain.Entities;
 using WheresNannyApi.Domain.Entities.Dto;
+using static Google.Apis.Requests.BatchRequest;
 
 namespace WheresNannyApi.Application.Services
 {
@@ -284,9 +285,54 @@ namespace WheresNannyApi.Application.Services
         #endregion
 
         #region Cancel the service
-        public bool CancelTheService(int serviceId)
+        public async Task<bool> CancelTheService(int serviceId, bool isClient)
         {
-            return true;
+            var currentService = 
+                _unitOfWork.GetRepository<Service>()
+                .GetFirstOrDefault(
+                    predicate: service => service.Id == serviceId,
+                    include: x =>
+                        x.Include(x => x.NannyService)
+                        .ThenInclude(x => x.Person)
+                        .ThenInclude(x => x.User)
+                        .Include(x => x.PersonService)
+                        .ThenInclude(x => x.User));
+
+            if (currentService == null)
+            {
+                throw new Exception("O serviço informado não foi encontrado");
+            }
+
+            var personToSendNotification =
+                isClient ? currentService?.NannyService?.Person?.User?.DeviceId : currentService?.PersonService?.User?.DeviceId;
+
+            var twoPercentOfServicePrice = currentService?.Price * 0.02m;
+            var messageToPersonWhoCanceled = isClient ? $"Você deverá pagar uma taxa de {twoPercentOfServicePrice}" :
+                                    "A babá cancelou o serviço. Desculpe-nos pelo transtorno";
+
+            var message = new Message()
+            {
+                Data = new Dictionary<string, string>()
+                {
+                    {"message", messageToPersonWhoCanceled },
+                },
+                Token = personToSendNotification,
+                Notification = new Notification()
+                {
+                    Title = "Novo serviço",
+                    Body = messageToPersonWhoCanceled
+                },
+                Android = new AndroidConfig { Priority = Priority.High }
+            };
+
+            _firebaseMessagerService.SendNotification(message);
+
+            currentService.ServiceHasBeenCanceled = true;
+
+            _unitOfWork.GetRepository<Service>().Update(currentService);
+            var sucessful = await _unitOfWork.SaveChangesAsync() > 0;
+
+            return sucessful;
         }
         #endregion
     }

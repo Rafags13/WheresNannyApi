@@ -145,6 +145,10 @@ namespace WheresNannyApi.Data.Context
                     .HasDefaultValue(false)
                     .IsRequired();
 
+                entity.Property(x => x.ServiceHasBeenCanceled)
+                    .HasColumnType("bit")
+                    .HasDefaultValue(false);
+
                 entity.HasOne(x => x.PersonService)
                    .WithMany(y => y.ServicesPerson)
                    .HasForeignKey(x => x.PersonId)
