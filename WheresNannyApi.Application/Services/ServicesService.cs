@@ -2,6 +2,7 @@
 using Arch.EntityFrameworkCore.UnitOfWork.Collections;
 using FirebaseAdmin.Messaging;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.OpenApi.Extensions;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -12,6 +13,7 @@ using WheresNannyApi.Application.Interfaces;
 using WheresNannyApi.Application.Util;
 using WheresNannyApi.Domain.Entities;
 using WheresNannyApi.Domain.Entities.Dto;
+using WheresNannyApi.Domain.Entities.Enums;
 using static Google.Apis.Requests.BatchRequest;
 
 namespace WheresNannyApi.Application.Services
@@ -64,7 +66,8 @@ namespace WheresNannyApi.Application.Services
                 Data = new Dictionary<string, string>()
                 {
                     {"message", $"Um novo serviço foi chamado, deseja aceitar?" },
-                    {"response", Newtonsoft.Json.JsonConvert.SerializeObject(response)}
+                    {"response", Newtonsoft.Json.JsonConvert.SerializeObject(response)},
+                    {"typeOfNotification", ((ushort)TypeOfNotification.Question).ToString()}
                 },
                 Token = mobileNannyDeviceId,
                 Notification = new Notification()
@@ -183,7 +186,8 @@ namespace WheresNannyApi.Application.Services
                 Data = new Dictionary<string, string>()
                 {
                     {"message", $"O serviço da babá {currentService?.NannyService.Person.Fullname} {acceptedServiceMessage}" },
-                    {"response", Newtonsoft.Json.JsonConvert.SerializeObject(response)}
+                    {"response", Newtonsoft.Json.JsonConvert.SerializeObject(response)},
+                    {"typeOfNotification", ((ushort)TypeOfNotification.Positive).ToString() },
                 },
                 Token = currentService?.PersonService?.User?.DeviceId,
                 Notification = new Notification()
@@ -310,12 +314,13 @@ namespace WheresNannyApi.Application.Services
                 Data = new Dictionary<string, string>()
                 {
                     {"message", messageToDisapointedPerson },
+                    {"typeOfNotification", ((ushort)TypeOfNotification.Negative).ToString() },
                 },
                 Token = personToSendNotification,
                 Notification = new Notification()
                 {
                     Title = "Novo serviço",
-                    Body = messageToDisapointedPerson
+                    Body = messageToDisapointedPerson,
                 },
                 Android = new AndroidConfig { Priority = Priority.High }
             };
