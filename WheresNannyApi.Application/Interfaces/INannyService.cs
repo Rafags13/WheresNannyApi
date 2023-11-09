@@ -11,5 +11,6 @@ namespace WheresNannyApi.Application.Interfaces
     {
         public List<ServiceNannyCardDto> GetAllNannyServices(int userId, int pageIndex);
         public NannyDashboardInformationDto GetNannyDashboardInformationDto(int userId);
+        public EarnFromNannyByMonthDto GetEarnsByMonth(int month, int nannyId);
     }
 }

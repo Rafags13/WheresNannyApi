@@ -13,7 +13,7 @@
         public int Id { get; set; }
         public TimeSpan ServiceFinishHour { get; set; }
         public DateTime HiringDate { get; set; }
-        public decimal Price{ get; set; }
+        public decimal Price { get; set; }
         public int PersonId { get; set; }
         public bool ServiceAccepted { get; set; }
         public bool ServiceHasBeenCanceled { get; set; }

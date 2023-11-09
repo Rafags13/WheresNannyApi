@@ -55,6 +55,7 @@ namespace WheresNannyApi.Application.Services
 
             return currentServicesFromNanny;
         }
+
         #endregion
 
         #region Nanny Dashboard Information
@@ -100,6 +101,15 @@ namespace WheresNannyApi.Application.Services
 
             return returnData;
         }
+        #endregion
+
+        #region Calculate earn by month
+
+        public EarnFromNannyByMonthDto GetEarnsByMonth(int month, int nannyId)
+        {
+            return new EarnFromNannyByMonthDto();
+        }
+
         #endregion
     }
 }

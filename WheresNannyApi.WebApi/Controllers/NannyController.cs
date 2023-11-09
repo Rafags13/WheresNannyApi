@@ -48,5 +48,22 @@ namespace WheresNannyApi.WebApi.Controllers
                 return BadRequest(ex.Message);
             }
         }
+
+        [HttpGet("GetEarnsByMonth/{month}/{nannyId}")]
+        [Authorize]
+        public IActionResult GetEarnsByMonth([FromRoute] int month, int nannyId)
+        {
+            try
+            {
+                var earnByMonth = _nannyService.GetEarnsByMonth(month, nannyId);
+
+                return Ok(earnByMonth);
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(ex.Message);
+                throw;
+            }
+        }
     }
 }
