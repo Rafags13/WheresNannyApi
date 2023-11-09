@@ -8,6 +8,7 @@ namespace WheresNannyApi.Domain.Entities.Dto
 {
     public class MainPayer
     {
+        public int Id { get; set; }
         public string Name { get; set; } = string.Empty;
 
         public decimal TotalPayment { get; set; }

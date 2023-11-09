@@ -9,6 +9,6 @@ namespace WheresNannyApi.Domain.Entities.Dto
     public class EarnFromNannyByMonthDto
     {
         public decimal TotalEarn { get; set; }
-        public ICollection<MainPayer>? MainPeopleWhoHireHer { get; set; }
+        public IEnumerable<MainPayer>? MainPeopleWhoHireHer { get; set; }
     }
 }

@@ -62,7 +62,6 @@ namespace WheresNannyApi.WebApi.Controllers
             catch (Exception ex)
             {
                 return BadRequest(ex.Message);
-                throw;
             }
         }
     }

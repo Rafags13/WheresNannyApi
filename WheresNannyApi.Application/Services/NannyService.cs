@@ -107,7 +107,25 @@ namespace WheresNannyApi.Application.Services
 
         public EarnFromNannyByMonthDto GetEarnsByMonth(int month, int nannyId)
         {
-            return new EarnFromNannyByMonthDto();
+            var serviceRepository = _unitOfWork.GetRepository<Service>();
+            
+            var countingServicesFromThatNanny = serviceRepository.Count(x => x.NannyId == nannyId && x.HiringDate.Month == month);
+
+            var allServicesFromThatNannyByMonth =
+                serviceRepository
+                .GetPagedList(
+                    predicate: x => x.NannyId == nannyId && x.HiringDate.Month == month,
+                    include: x =>
+                        x.Include(x => x.NannyService)
+                        .ThenInclude(x => x.Person)
+                        .Include(x => x.PersonService),
+                    pageSize: countingServicesFromThatNanny).Items.Select(x => new { Price = x.Price, PersonWhoHire = new { Id = x.PersonId, PersonFullname = x.PersonService.Fullname, DateFromHire = x.HiringDate } });
+
+            var totalEarn = allServicesFromThatNannyByMonth.Sum(x => x.Price);
+
+            var personsWhoPayed = allServicesFromThatNannyByMonth.GroupBy(x => x.PersonWhoHire.Id).Select(x => new MainPayer { Id = x.Key, Name = x.FirstOrDefault().PersonWhoHire.PersonFullname, TotalPayment = x.Sum(x => x.Price), DateFromFirstHire = x.FirstOrDefault().PersonWhoHire.DateFromHire}).OrderBy(x => x.TotalPayment).Take(3);
+
+            return new EarnFromNannyByMonthDto { TotalEarn = totalEarn, MainPeopleWhoHireHer = personsWhoPayed };
         }
 
         #endregion
