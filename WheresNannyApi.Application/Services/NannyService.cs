@@ -68,14 +68,16 @@ namespace WheresNannyApi.Application.Services
 
             var lastServiceFromNanny =
                 _unitOfWork.GetRepository<Service>()
-                .GetPagedList(include:x =>
+                .GetPagedList(predicate: x => x.NannyId == currentNanny.Id,
+                include:x =>
                     x.Include(x => x.PersonService))
                 .Items
-                .Where(x => x.NannyId == currentNanny.Id)
                 .Select(x => new ServiceNannyCardDto { ClientName = x.PersonService!.Fullname, ServiceId = x.Id, HiringDate = x.HiringDate, ServicePrice = x.Price })
                 .LastOrDefault();
 
-            var serviceList = _unitOfWork.GetRepository<Service>().GetPagedList().Items.Where(x => x.NannyId == currentNanny.Id);
+            var countingFromServiceListOfThisNanny = _unitOfWork.GetRepository<Service>().Count(x => x.NannyId == currentNanny.Id);
+
+            var serviceList = _unitOfWork.GetRepository<Service>().GetPagedList(predicate: x => x.NannyId == currentNanny.Id, pageSize: countingFromServiceListOfThisNanny).Items;
 
             DateTime lastSixMonthsBefore = DateTime.Now.AddMonths(-5);
             List<CountingChartDto> countingChartData = new List<CountingChartDto>();
@@ -87,7 +89,7 @@ namespace WheresNannyApi.Application.Services
                 string monthName = CultureInfo.CurrentCulture.DateTimeFormat.GetAbbreviatedMonthName(lastSixMonthsBefore.Month).ToUpper();
                 var countingService = serviceList.Where(x => x.HiringDate.Month == lastSixMonthsBefore.Month).Count();
                 monthNames.Add(monthName);
-                countingChartData.Add(new CountingChartDto(countingService));
+                countingChartData.Add(new CountingChartDto(countingService, lastSixMonthsBefore.Month));
                 earnChartData.Add(new EarnCountingChartDto(currentNanny.ServicePrice * countingService));
                 lastSixMonthsBefore = lastSixMonthsBefore.AddMonths(1);
             }
@@ -105,8 +107,9 @@ namespace WheresNannyApi.Application.Services
 
         #region Calculate earn by month
 
-        public EarnFromNannyByMonthDto GetEarnsByMonth(int month, int nannyId)
+        public EarnFromNannyByMonthDto GetEarnsByMonth(int month, int userId)
         {
+            var nannyId = _unitOfWork.GetRepository<Nanny>().GetFirstOrDefault(predicate: x => x.Person.UserId == userId, include: x => x.Include(x => x.Person)).Id;
             var serviceRepository = _unitOfWork.GetRepository<Service>();
             
             var countingServicesFromThatNanny = serviceRepository.Count(x => x.NannyId == nannyId && x.HiringDate.Month == month);
@@ -119,11 +122,11 @@ namespace WheresNannyApi.Application.Services
                         x.Include(x => x.NannyService)
                         .ThenInclude(x => x.Person)
                         .Include(x => x.PersonService),
-                    pageSize: countingServicesFromThatNanny).Items.Select(x => new { Price = x.Price, PersonWhoHire = new { Id = x.PersonId, PersonFullname = x.PersonService.Fullname, DateFromHire = x.HiringDate } });
+                    pageSize: countingServicesFromThatNanny).Items.Select(x => new { ServiceId = x.Id, Price = x.Price, PersonWhoHire = new { Id = x.PersonId, PersonFullname = x.PersonService.Fullname, DateFromHire = x.HiringDate, UrlPhoto = x.PersonService.ImageUri } });
 
             var totalEarn = allServicesFromThatNannyByMonth.Sum(x => x.Price);
 
-            var personsWhoPayed = allServicesFromThatNannyByMonth.GroupBy(x => x.PersonWhoHire.Id).Select(x => new MainPayer { Id = x.Key, Name = x.FirstOrDefault().PersonWhoHire.PersonFullname, TotalPayment = x.Sum(x => x.Price), DateFromFirstHire = x.FirstOrDefault().PersonWhoHire.DateFromHire}).OrderBy(x => x.TotalPayment).Take(3);
+            var personsWhoPayed = allServicesFromThatNannyByMonth.GroupBy(x => x.PersonWhoHire.Id).Select(x => new MainPayer { Id = x.Key, FirstServiceId=x.FirstOrDefault().ServiceId, Name = x.FirstOrDefault().PersonWhoHire.PersonFullname, UriClient = x.FirstOrDefault().PersonWhoHire.UrlPhoto,TotalPayment = x.Sum(x => x.Price), DateFromFirstHire = x.FirstOrDefault().PersonWhoHire.DateFromHire}).OrderBy(x => x.TotalPayment).Take(3);
 
             return new EarnFromNannyByMonthDto { TotalEarn = totalEarn, MainPeopleWhoHireHer = personsWhoPayed };
         }

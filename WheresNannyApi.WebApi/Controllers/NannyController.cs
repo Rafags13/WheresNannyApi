@@ -49,13 +49,13 @@ namespace WheresNannyApi.WebApi.Controllers
             }
         }
 
-        [HttpGet("GetEarnsByMonth/{month}/{nannyId}")]
+        [HttpGet("GetEarnsByMonth/{month}/{userId}")]
         [Authorize]
-        public IActionResult GetEarnsByMonth([FromRoute] int month, int nannyId)
+        public IActionResult GetEarnsByMonth([FromRoute] int month, int userId)
         {
             try
             {
-                var earnByMonth = _nannyService.GetEarnsByMonth(month, nannyId);
+                var earnByMonth = _nannyService.GetEarnsByMonth(month, userId);
 
                 return Ok(earnByMonth);
             }
