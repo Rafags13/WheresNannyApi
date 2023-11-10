@@ -118,5 +118,21 @@ namespace WheresNannyApi.WebApi.Controllers
                 return BadRequest(ex.Message);
             }
         }
+
+        [HttpPost("CancelService/{serviceId}")]
+        [Authorize]
+        public async Task<IActionResult> CancelTheService([FromRoute] int serviceId, [FromQuery(Name = "isClient")] bool isClient)
+        {
+            try
+            {
+                var message = await _servicesService.CancelTheService(serviceId, isClient);
+
+                return Ok(message);
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(ex.Message);
+            }
+        }
     }
 }

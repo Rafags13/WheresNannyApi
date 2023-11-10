@@ -2,6 +2,7 @@
 using Arch.EntityFrameworkCore.UnitOfWork.Collections;
 using FirebaseAdmin.Messaging;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.OpenApi.Extensions;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -12,6 +13,8 @@ using WheresNannyApi.Application.Interfaces;
 using WheresNannyApi.Application.Util;
 using WheresNannyApi.Domain.Entities;
 using WheresNannyApi.Domain.Entities.Dto;
+using WheresNannyApi.Domain.Entities.Enums;
+using static Google.Apis.Requests.BatchRequest;
 
 namespace WheresNannyApi.Application.Services
 {
@@ -63,7 +66,8 @@ namespace WheresNannyApi.Application.Services
                 Data = new Dictionary<string, string>()
                 {
                     {"message", $"Um novo serviço foi chamado, deseja aceitar?" },
-                    {"response", Newtonsoft.Json.JsonConvert.SerializeObject(response)}
+                    {"response", Newtonsoft.Json.JsonConvert.SerializeObject(response)},
+                    {"typeOfNotification", ((ushort)TypeOfNotification.Question).ToString()}
                 },
                 Token = mobileNannyDeviceId,
                 Notification = new Notification()
@@ -182,7 +186,8 @@ namespace WheresNannyApi.Application.Services
                 Data = new Dictionary<string, string>()
                 {
                     {"message", $"O serviço da babá {currentService?.NannyService.Person.Fullname} {acceptedServiceMessage}" },
-                    {"response", Newtonsoft.Json.JsonConvert.SerializeObject(response)}
+                    {"response", Newtonsoft.Json.JsonConvert.SerializeObject(response)},
+                    {"typeOfNotification", ((ushort)TypeOfNotification.Positive).ToString() },
                 },
                 Token = currentService?.PersonService?.User?.DeviceId,
                 Notification = new Notification()
@@ -279,6 +284,62 @@ namespace WheresNannyApi.Application.Services
             };
 
             return data;
+        }
+
+        #endregion
+
+        #region Cancel the service
+        public async Task<string> CancelTheService(int serviceId, bool isClient)
+        {
+            var currentService = 
+                _unitOfWork.GetRepository<Service>()
+                .GetFirstOrDefault(
+                    predicate: service => service.Id == serviceId,
+                    include: x =>
+                        x.Include(x => x.NannyService)
+                        .ThenInclude(x => x.Person)
+                        .ThenInclude(x => x.User)
+                        .Include(x => x.PersonService)
+                        .ThenInclude(x => x.User));
+
+            if (currentService == null) throw new Exception("O serviço informado não foi encontrado");
+            
+            var personToSendNotification =
+                isClient ? currentService?.NannyService?.Person?.User?.DeviceId : currentService?.PersonService?.User?.DeviceId;
+
+            var messageToDisapointedPerson = $"{(isClient ? "O cliente" : "a babá") } cancelou o serviço. Desculpe-nos pelo transtorno";
+
+            var message = new Message()
+            {
+                Data = new Dictionary<string, string>()
+                {
+                    {"message", messageToDisapointedPerson },
+                    {"typeOfNotification", ((ushort)TypeOfNotification.Negative).ToString() },
+                },
+                Token = personToSendNotification,
+                Notification = new Notification()
+                {
+                    Title = "Novo serviço",
+                    Body = messageToDisapointedPerson,
+                },
+                Android = new AndroidConfig { Priority = Priority.High }
+            };
+
+            _firebaseMessagerService.SendNotification(message);
+
+            currentService.ServiceHasBeenCanceled = true;
+
+            _unitOfWork.GetRepository<Service>().Update(currentService);
+            var sucessful = await _unitOfWork.SaveChangesAsync() > 0;
+
+            if (!sucessful) throw new Exception("Não foi possível cancelar o serviço. Tente novamente, mais tarde");
+
+            var twoPercentOfServicePrice = currentService?.Price * 0.02m;
+
+            var messageToReturnForPersonWhoCanceled = isClient ? $"Você deverá pagar a taxa simbólica de 2% pelo cancelamento: R$ {twoPercentOfServicePrice}" :
+                "Evite  de cancelar serviços, isso pode gerar frustrações nos clientes e evitar futuros chamados.";
+
+            return messageToReturnForPersonWhoCanceled;
         }
         #endregion
     }

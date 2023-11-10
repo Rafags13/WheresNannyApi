@@ -8,11 +8,14 @@ namespace WheresNannyApi.Domain.Entities.Dto
 {
     public class CountingChartDto
     {
-        public CountingChartDto(int data)
+        public CountingChartDto(int data, int monthIndex)
         {
             Data = data;
+            MonthIndex = monthIndex;
+
         }
         public CountingChartDto() { }
         public int Data { get; set; }
+        public int MonthIndex { get; set; }
     }
 }
