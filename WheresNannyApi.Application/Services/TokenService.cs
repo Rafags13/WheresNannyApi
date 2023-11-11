@@ -114,10 +114,11 @@ namespace WheresNannyApi.Application.Services
             var currentUser = _unitOfWork.GetRepository<User>().GetFirstOrDefault(predicate: x => x.Id == userId);
 
             if (currentUser is null) return false;
+            DateTime? nullableDateTime = null;
 
             currentUser.Token = "";
-            currentUser.CreatedIn = null;
-            currentUser.ExpiresIn = null;
+            currentUser.CreatedIn = nullableDateTime;
+            currentUser.ExpiresIn = nullableDateTime;
             currentUser.DeviceId = "";
 
             _unitOfWork.GetRepository<User>().Update(currentUser);

@@ -30,6 +30,6 @@ namespace WheresNannyApi.Domain.Entities
         public string Complement { get; set; } = string.Empty;
         public float? Latitude { get; set; }
         public float? Longitude { get; set; }
-        public ICollection<Person>? PersonsWhoHasThisAddress { get; set; } = new List<Person>();
+        public ICollection<Person>? PersonsWhoHasThisAddress { get; set; }
     }
 }

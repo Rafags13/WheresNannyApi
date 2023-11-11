@@ -35,6 +35,7 @@ namespace WheresNannyApi.Data.Context
 
                 entity.Property(x => x.CreatedIn)
                     .IsRequired(false)
+                    .HasDefaultValue(value: null)
                     .HasColumnType("datetime2");
 
                 entity.Property(x => x.ExpiresIn)
